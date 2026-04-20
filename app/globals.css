@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@layer components {
+  .nav-link {
+    @apply text-white text-sm font-bold px-3 py-1.5 rounded-full border border-neutral-600 hover:bg-yellow-400 hover:text-black hover:border-yellow-400 transition-all;
+  }
+  .nav-link-red {
+    @apply border-red-500 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500;
+  }
+}
