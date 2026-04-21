@@ -23,3 +23,23 @@ export interface Ganador {
   emoji: string;
   sorteo: string;
 }
+export interface Producto {
+  nombre: string;
+  descripcion: string;
+  emoji: string;
+}
+
+export interface Empresa {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  categoria: string;
+  emoji: string;
+  whatsapp: string;
+  telefono: string;
+  instagram?: string;
+  facebook?: string;
+  tiktok?: string;
+  sorteos: string[]; // ids de sorteos en que participó
+  productos: Producto[];
+}

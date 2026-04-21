@@ -16,6 +16,7 @@ export default function Navbar() {
           <a href="#" className="nav-link nav-link-red">💬 WhatsApp</a>
           <a href="#" className="nav-link">🔵 Facebook</a>
           <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link>
+          <Link href="/empresas" className="nav-link">🏢 Empresas</Link>
         </div>
 
       </div>
