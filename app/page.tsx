@@ -3,6 +3,7 @@ import Hero from "./components/Hero";
 import Sorteos from "./components/Sorteos";
 import AlertaSeguridad from "./components/AlertaSeguridad";
 import Ganadores from "./components/Ganadores";
+import FAQ from "./components/Faq";
 import Footer from "./components/Footer";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <Sorteos />
       <AlertaSeguridad />
       <Ganadores />
+      <FAQ />
       <Footer />
     </main>
   );

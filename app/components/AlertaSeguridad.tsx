@@ -1,3 +1,4 @@
+import FadeIn from "./FadeIn";
 export default function AlertaSeguridad() {
   return (
     <section className="bg-[#1a0a00] border-y-4 border-yellow-400 py-10 px-4 text-center">

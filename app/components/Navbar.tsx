@@ -17,6 +17,7 @@ export default function Navbar() {
           <a href="#" className="nav-link">🔵 Facebook</a>
           <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link>
           <Link href="/empresas" className="nav-link">🏢 Empresas</Link>
+          <Link href="/como-participar" className="nav-link">❓ ¿Cómo participar?</Link>
         </div>
 
       </div>
