@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-[#0d0d0d] border-b-2 border-gold-400">
@@ -13,6 +15,7 @@ export default function Navbar() {
           <a href="#" className="nav-link">🏆 Ganadores</a>
           <a href="#" className="nav-link nav-link-red">💬 WhatsApp</a>
           <a href="#" className="nav-link">🔵 Facebook</a>
+          <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link>
         </div>
 
       </div>

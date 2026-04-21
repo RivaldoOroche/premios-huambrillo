@@ -15,3 +15,11 @@ export interface Sorteo {
   esEspecial?: boolean;
   link: string;
 }
+export interface Ganador {
+  id: string;
+  nombre: string;
+  premio: string;
+  fecha: string;
+  emoji: string;
+  sorteo: string;
+}
