@@ -8,43 +8,62 @@ interface Props {
 
 export default function SorteoCard({ sorteo }: Props) {
   return (
-    <div className="bg-[#111] border-2 border-neutral-700 rounded-2xl overflow-hidden hover:border-yellow-400 hover:-translate-y-1 transition-all duration-200">
+    <div className={`relative bg-[#111] rounded-2xl overflow-hidden border-2 hover:-translate-y-1 transition-all duration-300 shadow-lg ${
+      sorteo.esEspecial
+        ? "border-gold-400 shadow-[0_0_20px_rgba(232,184,0,0.15)]"
+        : "border-neutral-800 hover:border-red-600 hover:shadow-[0_0_20px_rgba(224,48,48,0.15)]"
+    }`}>
+
+      {/* Brillo superior */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
       {/* Header */}
-      <div className={`px-4 py-3 flex flex-wrap items-center gap-2 ${sorteo.esEspecial ? "bg-yellow-500" : "bg-red-600"}`}>
-        <span className={`text-xs font-black px-3 py-1 rounded-full bg-black/25 uppercase tracking-wide ${sorteo.esEspecial ? "text-black" : "text-white"}`}>
+      <div className={`px-4 py-3 flex flex-wrap items-center gap-2 ${
+        sorteo.esEspecial
+          ? "bg-gradient-to-r from-yellow-600 via-gold-400 to-yellow-600"
+          : "bg-gradient-to-r from-red-800 via-red-600 to-red-800"
+      }`}>
+        <span className="text-xs font-black px-3 py-1 rounded-full bg-black/30 uppercase tracking-wide text-white">
           {sorteo.badge}
         </span>
-        <span className={`font-black text-base sm:text-lg tracking-widest uppercase ${sorteo.esEspecial ? "text-black" : "text-white"}`}>
+        <span className={`font-bebas text-xl tracking-widest uppercase ${sorteo.esEspecial ? "text-black" : "text-white"}`}>
           {sorteo.fecha}
         </span>
       </div>
 
       {/* Body */}
       <div className="p-4 sm:p-5">
-        <h2 className={`text-xl sm:text-2xl font-black tracking-widest uppercase mb-4 ${sorteo.esEspecial ? "text-white" : "text-yellow-400"}`}>
+        <h2 className={`font-bebas text-3xl tracking-widest uppercase mb-4 ${sorteo.esEspecial ? "text-gold-400" : "text-white"}`}>
           {sorteo.titulo}
         </h2>
 
         {/* Lista de premios */}
-        <ul className="mb-4 space-y-2">
+        <ul className="mb-4 space-y-1.5">
           {sorteo.premios.map((premio, i) => (
-            <li key={i} className="flex items-center gap-3 border-b border-neutral-800 pb-2 last:border-0">
+            <li key={i} className={`flex items-center gap-3 py-1.5 border-b last:border-0 ${
+              premio.esMayor ? "border-gold-400/20" : "border-neutral-800"
+            }`}>
               <span className="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded min-w-[28px] text-center shrink-0">
                 {premio.cantidad}
               </span>
-              <span className={`text-sm ${premio.esMayor ? "text-yellow-400 font-black" : "text-neutral-300"}`}>
+              <span className={`text-sm ${premio.esMayor ? "text-gold-400 font-black" : "text-neutral-300"}`}>
                 {premio.nombre}
               </span>
             </li>
           ))}
         </ul>
+
         {/* Contador */}
         <Contador fechaSorteo={sorteo.fechaSorteo} esEspecial={sorteo.esEspecial} />
+
         {/* Precio */}
-        <div className="bg-[#1a1a1a] rounded-xl p-3 text-center mb-4">
+        <div className={`rounded-xl p-3 text-center mb-4 border ${
+          sorteo.esEspecial
+            ? "bg-gold-400/5 border-gold-400/20"
+            : "bg-red-600/5 border-red-600/20"
+        }`}>
           <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Precio del ticket</p>
-          <p className="text-4xl sm:text-5xl font-black text-yellow-400 leading-none">
+          <p className={`text-4xl sm:text-5xl font-bebas leading-none ${sorteo.esEspecial ? "text-gold-400" : "text-white"}`}>
             <span className="text-xl sm:text-2xl">S/ </span>{sorteo.precio}
           </p>
           <p className="text-xs text-neutral-500 mt-1">Paga con YAPE o PLIN</p>
@@ -53,17 +72,17 @@ export default function SorteoCard({ sorteo }: Props) {
         {/* Botón */}
         <Link
           href={`/sorteos/${sorteo.id}`}
-          className={`block w-full text-center py-3 rounded-xl font-black text-base sm:text-lg uppercase tracking-wide transition-all hover:scale-105 ${
+          className={`block w-full text-center py-3.5 rounded-xl font-black text-base uppercase tracking-widest transition-all hover:scale-105 shadow-lg ${
             sorteo.esEspecial
-              ? "bg-yellow-400 text-black hover:bg-yellow-300"
-              : "bg-red-600 text-white hover:bg-red-700"
+              ? "bg-gradient-to-r from-yellow-600 via-gold-400 to-yellow-600 text-black hover:brightness-110 shadow-gold-400/20"
+              : "bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white hover:brightness-110 shadow-red-600/20"
           }`}
         >
-          ¡Participar ahora!
+          ¡Participar ahora! →
         </Link>
 
-        <p className="text-center text-xs text-neutral-500 mt-2">
-          A nombre de: <strong className="text-yellow-400">HUAMBRILLO S.A.C.</strong>
+        <p className="text-center text-xs text-neutral-600 mt-2">
+          A nombre de: <strong className="text-gold-400">HUAMBRILLO S.A.C.</strong>
         </p>
       </div>
 
