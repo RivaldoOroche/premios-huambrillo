@@ -8,6 +8,7 @@ export interface Sorteo {
   id: string;
   badge: string;
   fecha: string;
+  fechaSorteo: string; // 👈 nuevo
   titulo: string;
   premios: Premio[];
   precio: number;

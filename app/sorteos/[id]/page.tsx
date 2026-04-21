@@ -1,6 +1,7 @@
 import { sorteos } from "../../data/sorteos";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Contador from "../../components/Contador";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -56,7 +57,7 @@ export default async function DetalleSorteo({ params }: Props) {
             ))}
           </ul>
         </section>
-
+        <Contador fechaSorteo={sorteo.fechaSorteo} esEspecial={sorteo.esEspecial} />
         {/* Precio y pago */}
         <section className="bg-[#111] border-2 border-neutral-700 rounded-2xl p-6 text-center">
           <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Precio del ticket</p>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Sorteo } from "../types/sorteo";
+import Contador from "./Contador";
 
 interface Props {
   sorteo: Sorteo;
@@ -38,7 +39,8 @@ export default function SorteoCard({ sorteo }: Props) {
             </li>
           ))}
         </ul>
-
+        {/* Contador */}
+        <Contador fechaSorteo={sorteo.fechaSorteo} esEspecial={sorteo.esEspecial} />
         {/* Precio */}
         <div className="bg-[#1a1a1a] rounded-xl p-3 text-center mb-4">
           <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Precio del ticket</p>
