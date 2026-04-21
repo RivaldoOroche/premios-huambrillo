@@ -18,6 +18,7 @@ export default function Navbar() {
           <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link>
           <Link href="/empresas" className="nav-link">🏢 Empresas</Link>
           <Link href="/como-participar" className="nav-link">❓ ¿Cómo participar?</Link>
+          <Link href="/contacto" className="nav-link">📬 Contacto</Link>
         </div>
 
       </div>
