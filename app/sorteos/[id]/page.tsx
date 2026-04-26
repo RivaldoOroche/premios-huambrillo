@@ -2,6 +2,7 @@ import { sorteos } from "../../data/sorteos";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Contador from "../../components/Contador";
+import ComprarTickets from "../../components/ComprarTickets";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -57,8 +58,10 @@ export default async function DetalleSorteo({ params }: Props) {
             ))}
           </ul>
         </section>
+        {/* Comprar tickets */}
+        <ComprarTickets sorteo={sorteo} />
         <Contador fechaSorteo={sorteo.fechaSorteo} esEspecial={sorteo.esEspecial} />
-        {/* Precio y pago */}
+{/*         Precio y pago
         <section className="bg-[#111] border-2 border-neutral-700 rounded-2xl p-6 text-center">
           <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Precio del ticket</p>
           <p className="text-7xl font-black text-yellow-400 leading-none mb-1">
@@ -76,7 +79,7 @@ export default async function DetalleSorteo({ params }: Props) {
           </div>
 
           {/* BOTÓN CORREGIDO AQUÍ */}
-          <a
+{/*           <a
             href={sorteo.link}
             target="_blank"
             rel="noopener noreferrer"
@@ -84,7 +87,7 @@ export default async function DetalleSorteo({ params }: Props) {
           >
             💬 Confirmar por WhatsApp
           </a>
-        </section>
+        </section> */} 
 
         {/* Alerta */}
         <section className="bg-[#1a0a00] border-2 border-yellow-400 rounded-2xl p-6 text-center">
