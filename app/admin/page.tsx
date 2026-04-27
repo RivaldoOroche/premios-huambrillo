@@ -1,0 +1,409 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+type Tab = "tickets" | "sorteos";
+type EstadoTicket = "pendiente" | "confirmado" | "rechazado";
+
+interface Ticket {
+  id: string;
+  sorteo_id: string;
+  numero: number;
+  nombre: string;
+  telefono: string;
+  email?: string;
+  cantidad: number;
+  estado: string;
+  comprobante?: string;
+  notas_admin?: string;
+  created_at: string;
+}
+
+interface Sorteo {
+  sorteo_id: string;
+  titulo: string;
+  fecha: string;
+  precio: number;
+  total_tickets: number;
+  tickets_vendidos: number;
+  activo: boolean;
+  es_especial: boolean;
+  badge: string;
+}
+
+export default function AdminPanel() {
+  const [autenticado, setAutenticado] = useState(false);
+  const [password, setPassword] = useState("");
+  const [errorLogin, setErrorLogin] = useState("");
+  const [tab, setTab] = useState<Tab>("tickets");
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [sorteos, setSorteos] = useState<Sorteo[]>([]);
+  const [estadoFiltro, setEstadoFiltro] = useState<EstadoTicket>("pendiente");
+  const [cargando, setCargando] = useState(false);
+  const [urlComprobante, setUrlComprobante] = useState("");
+  const [mostrarSorteoForm, setMostrarSorteoForm] = useState(false);
+  const [nuevoSorteo, setNuevoSorteo] = useState({
+    sorteo_id: "", badge: "", fecha: "", fecha_sorteo: "",
+    titulo: "", precio: 0, total_tickets: 1000, es_especial: false,
+    premios: "[]",
+  });
+
+  const cargarTickets = useCallback(async () => {
+    setCargando(true);
+    const res = await fetch(`/api/admin/tickets?estado=${estadoFiltro}`);
+    const data = await res.json();
+    setTickets(Array.isArray(data) ? data : []);
+    setCargando(false);
+  }, [estadoFiltro]);
+
+  const cargarSorteos = useCallback(async () => {
+    const res = await fetch("/api/admin/sorteos");
+    const data = await res.json();
+    setSorteos(Array.isArray(data) ? data : []);
+  }, []);
+
+  useEffect(() => {
+    if (!autenticado) return;
+    if (tab === "tickets") cargarTickets();
+    if (tab === "sorteos") cargarSorteos();
+  }, [autenticado, tab, estadoFiltro, cargarTickets, cargarSorteos]);
+
+  const handleLogin = async () => {
+    setErrorLogin("");
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (res.ok) setAutenticado(true);
+    else setErrorLogin("Contraseña incorrecta");
+  };
+
+  const accionTicket = async (id: string, estado: string, notas?: string) => {
+    await fetch("/api/admin/tickets", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, estado, notas_admin: notas }),
+    });
+    cargarTickets();
+  };
+
+  const verComprobante = async (path: string) => {
+    const res = await fetch(`/api/admin/comprobante?path=${encodeURIComponent(path)}`);
+    const data = await res.json();
+    setUrlComprobante(data.url);
+  };
+
+  const toggleSorteo = async (sorteo_id: string, activo: boolean) => {
+    await fetch("/api/admin/sorteos", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sorteo_id, activo: !activo }),
+    });
+    cargarSorteos();
+  };
+
+  const crearSorteo = async () => {
+    const body = { ...nuevoSorteo, premios: JSON.parse(nuevoSorteo.premios) };
+    await fetch("/api/admin/sorteos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    setMostrarSorteoForm(false);
+    cargarSorteos();
+  };
+
+  const inputClass = "w-full bg-[#1a1a1a] border border-neutral-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#e8b800]";
+
+  // LOGIN
+  if (!autenticado) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-8 w-full max-w-sm"
+        >
+          <p className="font-bebas text-3xl text-[#e8b800] tracking-widest text-center mb-6">
+            🔐 Panel Admin
+          </p>
+          <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Contraseña</p>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            placeholder="••••••••"
+            className={inputClass + " mb-3"}
+          />
+          {errorLogin && <p className="text-red-500 text-xs mb-3">⚠️ {errorLogin}</p>}
+          <button
+            onClick={handleLogin}
+            className="w-full bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white font-black uppercase tracking-widest py-3 rounded-xl hover:brightness-110 transition-all"
+          >
+            Entrar
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // PANEL
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+
+      {/* Header */}
+      <div className="bg-[#111] border-b-2 border-[#e8b800] px-4 py-3 flex items-center justify-between">
+        <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">⚙️ Admin — Premios Huambrillo</p>
+        <a href="/" className="text-xs text-neutral-500 hover:text-[#e8b800] transition-colors">← Ver sitio</a>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-neutral-800 px-4">
+        {(["tickets", "sorteos"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-6 py-3 font-black text-sm uppercase tracking-widest transition-colors ${
+              tab === t ? "text-[#e8b800] border-b-2 border-[#e8b800]" : "text-neutral-500 hover:text-white"
+            }`}
+          >
+            {t === "tickets" ? "🎫 Tickets" : "🎰 Sorteos"}
+          </button>
+        ))}
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+
+        {/* TAB TICKETS */}
+        {tab === "tickets" && (
+          <div>
+            {/* Filtros */}
+            <div className="flex gap-2 mb-6 flex-wrap">
+              {(["pendiente", "confirmado", "rechazado"] as EstadoTicket[]).map((e) => (
+                <button
+                  key={e}
+                  onClick={() => setEstadoFiltro(e)}
+                  className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${
+                    estadoFiltro === e
+                      ? e === "pendiente" ? "bg-yellow-500 text-black"
+                        : e === "confirmado" ? "bg-green-600 text-white"
+                        : "bg-red-600 text-white"
+                      : "bg-[#111] border border-neutral-700 text-neutral-400 hover:border-neutral-500"
+                  }`}
+                >
+                  {e === "pendiente" ? "⏳" : e === "confirmado" ? "✅" : "❌"} {e}
+                </button>
+              ))}
+            </div>
+
+            {cargando ? (
+              <p className="text-neutral-500 text-center py-12">Cargando...</p>
+            ) : tickets.length === 0 ? (
+              <p className="text-neutral-500 text-center py-12">No hay tickets {estadoFiltro}s</p>
+            ) : (
+              <div className="space-y-4">
+                {tickets.map((ticket) => (
+                  <motion.div
+                    key={ticket.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="bg-[#e8b800] text-black font-black text-sm px-3 py-0.5 rounded-lg">
+                            #{String(ticket.numero).padStart(4, "0")}
+                          </span>
+                          <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full uppercase">
+                            {ticket.sorteo_id}
+                          </span>
+                        </div>
+                        <p className="font-black text-white">{ticket.nombre}</p>
+                        <p className="text-neutral-400 text-sm">📞 {ticket.telefono}</p>
+                        {ticket.email && <p className="text-neutral-400 text-sm">✉️ {ticket.email}</p>}
+                        <p className="text-neutral-500 text-xs">
+                          {new Date(ticket.created_at).toLocaleString("es-PE")}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-2 items-end">
+                        {ticket.comprobante && (
+                          <button
+                            onClick={() => verComprobante(ticket.comprobante!)}
+                            className="text-xs bg-blue-600/20 border border-blue-600/40 text-blue-400 px-3 py-1.5 rounded-lg hover:bg-blue-600/30 transition-all"
+                          >
+                            📸 Ver comprobante
+                          </button>
+                        )}
+                        {estadoFiltro === "pendiente" && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => accionTicket(ticket.id, "confirmado")}
+                              className="text-xs bg-green-600 text-white font-black px-4 py-1.5 rounded-lg hover:bg-green-500 transition-all"
+                            >
+                              ✅ Aprobar
+                            </button>
+                            <button
+                              onClick={() => accionTicket(ticket.id, "rechazado", "Comprobante inválido")}
+                              className="text-xs bg-red-600 text-white font-black px-4 py-1.5 rounded-lg hover:bg-red-500 transition-all"
+                            >
+                              ❌ Rechazar
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB SORTEOS */}
+        {tab === "sorteos" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">Sorteos activos</p>
+              <button
+                onClick={() => setMostrarSorteoForm(!mostrarSorteoForm)}
+                className="bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white font-black text-sm uppercase tracking-widest px-5 py-2.5 rounded-xl hover:brightness-110 transition-all"
+              >
+                + Nuevo sorteo
+              </button>
+            </div>
+
+            {/* Formulario nuevo sorteo */}
+            <AnimatePresence>
+              {mostrarSorteoForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-3"
+                >
+                  <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Crear nuevo sorteo</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">ID único (ej: junio)</label>
+                      <input className={inputClass} placeholder="junio" value={nuevoSorteo.sorteo_id} onChange={e => setNuevoSorteo({...nuevoSorteo, sorteo_id: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Título</label>
+                      <input className={inputClass} placeholder="Gran Sorteo Junio" value={nuevoSorteo.titulo} onChange={e => setNuevoSorteo({...nuevoSorteo, titulo: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Badge</label>
+                      <input className={inputClass} placeholder="⭐ Especial" value={nuevoSorteo.badge} onChange={e => setNuevoSorteo({...nuevoSorteo, badge: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Fecha (texto)</label>
+                      <input className={inputClass} placeholder="Sorteo 30 de Junio" value={nuevoSorteo.fecha} onChange={e => setNuevoSorteo({...nuevoSorteo, fecha: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Fecha sorteo</label>
+                      <input className={inputClass} type="datetime-local" value={nuevoSorteo.fecha_sorteo} onChange={e => setNuevoSorteo({...nuevoSorteo, fecha_sorteo: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Precio ticket (S/)</label>
+                      <input className={inputClass} type="number" value={nuevoSorteo.precio} onChange={e => setNuevoSorteo({...nuevoSorteo, precio: parseInt(e.target.value)})} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Total tickets</label>
+                      <input className={inputClass} type="number" value={nuevoSorteo.total_tickets} onChange={e => setNuevoSorteo({...nuevoSorteo, total_tickets: parseInt(e.target.value)})} />
+                    </div>
+                    <div className="flex items-center gap-2 pt-4">
+                      <input type="checkbox" id="especial" checked={nuevoSorteo.es_especial} onChange={e => setNuevoSorteo({...nuevoSorteo, es_especial: e.target.checked})} />
+                      <label htmlFor="especial" className="text-sm text-neutral-400">¿Es sorteo especial?</label>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-neutral-500 mb-1 block">Premios (JSON)</label>
+                    <textarea className={inputClass + " h-32 resize-none font-mono text-xs"} value={nuevoSorteo.premios} onChange={e => setNuevoSorteo({...nuevoSorteo, premios: e.target.value})} />
+                  </div>
+                  <button onClick={crearSorteo} className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all">
+                    ✅ Crear sorteo
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Lista de sorteos */}
+            <div className="space-y-4">
+              {sorteos.map((sorteo) => (
+                <div key={sorteo.sorteo_id} className={`bg-[#111] border-2 rounded-2xl p-5 ${sorteo.activo ? "border-green-600/30" : "border-neutral-800"}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-full ${sorteo.activo ? "bg-green-600/20 text-green-400" : "bg-neutral-700 text-neutral-500"}`}>
+                          {sorteo.activo ? "● Activo" : "● Inactivo"}
+                        </span>
+                        <span className="text-xs text-neutral-600">{sorteo.badge}</span>
+                      </div>
+                      <p className="font-bebas text-xl text-[#e8b800] tracking-widest">{sorteo.titulo}</p>
+                      <p className="text-neutral-400 text-sm">{sorteo.fecha} · S/ {sorteo.precio} por ticket</p>
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs text-neutral-500 mb-1">
+                          <span>Tickets vendidos</span>
+                          <span>{sorteo.tickets_vendidos} / {sorteo.total_tickets}</span>
+                        </div>
+                        <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-red-600 to-[#e8b800] rounded-full transition-all"
+                            style={{ width: `${(sorteo.tickets_vendidos / sorteo.total_tickets) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleSorteo(sorteo.sorteo_id, sorteo.activo)}
+                      className={`text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${
+                        sorteo.activo
+                          ? "bg-red-600/20 border border-red-600/40 text-red-400 hover:bg-red-600/30"
+                          : "bg-green-600/20 border border-green-600/40 text-green-400 hover:bg-green-600/30"
+                      }`}
+                    >
+                      {sorteo.activo ? "Desactivar" : "Activar"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal comprobante */}
+      <AnimatePresence>
+        {urlComprobante && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setUrlComprobante("")}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#111] border-2 border-neutral-700 rounded-2xl p-4 max-w-lg w-full"
+            >
+              <div className="flex justify-between items-center mb-3">
+                <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Comprobante de pago</p>
+                <button onClick={() => setUrlComprobante("")} className="text-neutral-500 hover:text-white text-xl">✕</button>
+              </div>
+              <img src={urlComprobante} alt="Comprobante" className="w-full rounded-xl" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}
