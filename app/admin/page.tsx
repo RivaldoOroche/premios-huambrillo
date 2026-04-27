@@ -3,8 +3,36 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "tickets" | "sorteos";
+type Tab = "tickets" | "sorteos" | "mensajes" | "ganadores" | "empresas";
 type EstadoTicket = "pendiente" | "confirmado" | "rechazado";
+
+interface Mensaje {
+  id: string;
+  nombre: string;
+  email: string;
+  asunto: string;
+  mensaje: string;
+  leido: boolean;
+  created_at: string;
+}
+
+interface GanadorAdmin {
+  id: string;
+  sorteo_id: string;
+  nombre: string;
+  premio: string;
+  emoji: string;
+  fecha: string;
+  visible: boolean;
+}
+
+interface EmpresaAdmin {
+  id: string;
+  nombre: string;
+  categoria: string;
+  emoji: string;
+  activo: boolean;
+}
 
 interface Ticket {
   id: string;
@@ -48,6 +76,18 @@ export default function AdminPanel() {
     titulo: "", precio: 0, total_tickets: 1000, es_especial: false,
     premios: "[]",
   });
+  const [mensajes, setMensajes] = useState<Mensaje[]>([]);
+  const [ganadores, setGanadores] = useState<GanadorAdmin[]>([]);
+  const [empresas, setEmpresas] = useState<EmpresaAdmin[]>([]);
+  const [nuevoGanador, setNuevoGanador] = useState({
+    sorteo_id: "", nombre: "", premio: "", emoji: "🏆", fecha: "", visible: true,
+  });
+  const [mostrarGanadorForm, setMostrarGanadorForm] = useState(false);
+  const [nuevaEmpresa, setNuevaEmpresa] = useState({
+    id: "", nombre: "", descripcion: "", categoria: "", emoji: "🏢",
+    whatsapp: "", telefono: "", instagram: "", facebook: "", tiktok: "",
+  });
+  const [mostrarEmpresaForm, setMostrarEmpresaForm] = useState(false);
 
   const cargarTickets = useCallback(async () => {
     setCargando(true);
@@ -63,11 +103,32 @@ export default function AdminPanel() {
     setSorteos(Array.isArray(data) ? data : []);
   }, []);
 
+  const cargarMensajes = useCallback(async () => {
+    const res = await fetch("/api/admin/mensajes");
+    const data = await res.json();
+    setMensajes(Array.isArray(data) ? data : []);
+  }, []);
+
+  const cargarGanadores = useCallback(async () => {
+    const res = await fetch("/api/admin/ganadores");
+    const data = await res.json();
+    setGanadores(Array.isArray(data) ? data : []);
+  }, []);
+
+  const cargarEmpresas = useCallback(async () => {
+    const res = await fetch("/api/admin/empresas");
+    const data = await res.json();
+    setEmpresas(Array.isArray(data) ? data : []);
+  }, []);
+
   useEffect(() => {
     if (!autenticado) return;
-    if (tab === "tickets") cargarTickets();
-    if (tab === "sorteos") cargarSorteos();
-  }, [autenticado, tab, estadoFiltro, cargarTickets, cargarSorteos]);
+    if (tab === "tickets")   cargarTickets();
+    if (tab === "sorteos")   cargarSorteos();
+    if (tab === "mensajes")  cargarMensajes();
+    if (tab === "ganadores") cargarGanadores();
+    if (tab === "empresas")  cargarEmpresas();
+  }, [autenticado, tab, estadoFiltro, cargarTickets, cargarSorteos, cargarMensajes, cargarGanadores, cargarEmpresas]);
 
   const handleLogin = async () => {
     setErrorLogin("");
@@ -161,16 +222,22 @@ export default function AdminPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-neutral-800 px-4">
-        {(["tickets", "sorteos"] as Tab[]).map((t) => (
+      <div className="flex border-b border-neutral-800 px-4 overflow-x-auto">
+        {([
+          ["tickets",   "🎫 Tickets"],
+          ["sorteos",   "🎰 Sorteos"],
+          ["mensajes",  "📬 Mensajes"],
+          ["ganadores", "🏆 Ganadores"],
+          ["empresas",  "🏢 Empresas"],
+        ] as [Tab, string][]).map(([t, label]) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-6 py-3 font-black text-sm uppercase tracking-widest transition-colors ${
+            className={`px-5 py-3 font-black text-sm uppercase tracking-widest whitespace-nowrap transition-colors ${
               tab === t ? "text-[#e8b800] border-b-2 border-[#e8b800]" : "text-neutral-500 hover:text-white"
             }`}
           >
-            {t === "tickets" ? "🎫 Tickets" : "🎰 Sorteos"}
+            {label}
           </button>
         ))}
       </div>
@@ -180,7 +247,6 @@ export default function AdminPanel() {
         {/* TAB TICKETS */}
         {tab === "tickets" && (
           <div>
-            {/* Filtros */}
             <div className="flex gap-2 mb-6 flex-wrap">
               {(["pendiente", "confirmado", "rechazado"] as EstadoTicket[]).map((e) => (
                 <button
@@ -229,7 +295,6 @@ export default function AdminPanel() {
                           {new Date(ticket.created_at).toLocaleString("es-PE")}
                         </p>
                       </div>
-
                       <div className="flex flex-col gap-2 items-end">
                         {ticket.comprobante && (
                           <button
@@ -277,7 +342,6 @@ export default function AdminPanel() {
               </button>
             </div>
 
-            {/* Formulario nuevo sorteo */}
             <AnimatePresence>
               {mostrarSorteoForm && (
                 <motion.div
@@ -290,40 +354,40 @@ export default function AdminPanel() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">ID único (ej: junio)</label>
-                      <input className={inputClass} placeholder="junio" value={nuevoSorteo.sorteo_id} onChange={e => setNuevoSorteo({...nuevoSorteo, sorteo_id: e.target.value})} />
+                      <input className={inputClass} placeholder="junio" value={nuevoSorteo.sorteo_id} onChange={e => setNuevoSorteo({ ...nuevoSorteo, sorteo_id: e.target.value })} />
                     </div>
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">Título</label>
-                      <input className={inputClass} placeholder="Gran Sorteo Junio" value={nuevoSorteo.titulo} onChange={e => setNuevoSorteo({...nuevoSorteo, titulo: e.target.value})} />
+                      <input className={inputClass} placeholder="Gran Sorteo Junio" value={nuevoSorteo.titulo} onChange={e => setNuevoSorteo({ ...nuevoSorteo, titulo: e.target.value })} />
                     </div>
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">Badge</label>
-                      <input className={inputClass} placeholder="⭐ Especial" value={nuevoSorteo.badge} onChange={e => setNuevoSorteo({...nuevoSorteo, badge: e.target.value})} />
+                      <input className={inputClass} placeholder="⭐ Especial" value={nuevoSorteo.badge} onChange={e => setNuevoSorteo({ ...nuevoSorteo, badge: e.target.value })} />
                     </div>
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">Fecha (texto)</label>
-                      <input className={inputClass} placeholder="Sorteo 30 de Junio" value={nuevoSorteo.fecha} onChange={e => setNuevoSorteo({...nuevoSorteo, fecha: e.target.value})} />
+                      <input className={inputClass} placeholder="Sorteo 30 de Junio" value={nuevoSorteo.fecha} onChange={e => setNuevoSorteo({ ...nuevoSorteo, fecha: e.target.value })} />
                     </div>
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">Fecha sorteo</label>
-                      <input className={inputClass} type="datetime-local" value={nuevoSorteo.fecha_sorteo} onChange={e => setNuevoSorteo({...nuevoSorteo, fecha_sorteo: e.target.value})} />
+                      <input className={inputClass} type="datetime-local" value={nuevoSorteo.fecha_sorteo} onChange={e => setNuevoSorteo({ ...nuevoSorteo, fecha_sorteo: e.target.value })} />
                     </div>
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">Precio ticket (S/)</label>
-                      <input className={inputClass} type="number" value={nuevoSorteo.precio} onChange={e => setNuevoSorteo({...nuevoSorteo, precio: parseInt(e.target.value)})} />
+                      <input className={inputClass} type="number" value={nuevoSorteo.precio} onChange={e => setNuevoSorteo({ ...nuevoSorteo, precio: parseInt(e.target.value) })} />
                     </div>
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">Total tickets</label>
-                      <input className={inputClass} type="number" value={nuevoSorteo.total_tickets} onChange={e => setNuevoSorteo({...nuevoSorteo, total_tickets: parseInt(e.target.value)})} />
+                      <input className={inputClass} type="number" value={nuevoSorteo.total_tickets} onChange={e => setNuevoSorteo({ ...nuevoSorteo, total_tickets: parseInt(e.target.value) })} />
                     </div>
                     <div className="flex items-center gap-2 pt-4">
-                      <input type="checkbox" id="especial" checked={nuevoSorteo.es_especial} onChange={e => setNuevoSorteo({...nuevoSorteo, es_especial: e.target.checked})} />
+                      <input type="checkbox" id="especial" checked={nuevoSorteo.es_especial} onChange={e => setNuevoSorteo({ ...nuevoSorteo, es_especial: e.target.checked })} />
                       <label htmlFor="especial" className="text-sm text-neutral-400">¿Es sorteo especial?</label>
                     </div>
                   </div>
                   <div>
                     <label className="text-xs text-neutral-500 mb-1 block">Premios (JSON)</label>
-                    <textarea className={inputClass + " h-32 resize-none font-mono text-xs"} value={nuevoSorteo.premios} onChange={e => setNuevoSorteo({...nuevoSorteo, premios: e.target.value})} />
+                    <textarea className={inputClass + " h-32 resize-none font-mono text-xs"} value={nuevoSorteo.premios} onChange={e => setNuevoSorteo({ ...nuevoSorteo, premios: e.target.value })} />
                   </div>
                   <button onClick={crearSorteo} className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all">
                     ✅ Crear sorteo
@@ -332,7 +396,6 @@ export default function AdminPanel() {
               )}
             </AnimatePresence>
 
-            {/* Lista de sorteos */}
             <div className="space-y-4">
               {sorteos.map((sorteo) => (
                 <div key={sorteo.sorteo_id} className={`bg-[#111] border-2 rounded-2xl p-5 ${sorteo.activo ? "border-green-600/30" : "border-neutral-800"}`}>
@@ -375,6 +438,258 @@ export default function AdminPanel() {
             </div>
           </div>
         )}
+
+        {/* TAB MENSAJES */}
+        {tab === "mensajes" && (
+          <div className="space-y-4">
+            <p className="font-bebas text-2xl text-[#e8b800] tracking-widest mb-6">Mensajes de contacto</p>
+            {mensajes.length === 0 ? (
+              <p className="text-neutral-500 text-center py-12">No hay mensajes</p>
+            ) : mensajes.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={`bg-[#111] border-2 rounded-2xl p-5 ${msg.leido ? "border-neutral-800" : "border-[#e8b800]/40"}`}
+              >
+                <div className="flex flex-wrap justify-between gap-2 mb-3">
+                  <div>
+                    <p className="font-black text-white">{msg.nombre}</p>
+                    <p className="text-neutral-400 text-sm">✉️ {msg.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-1 rounded-full">{msg.asunto}</span>
+                    <p className="text-neutral-600 text-xs mt-1">{new Date(msg.created_at).toLocaleString("es-PE")}</p>
+                  </div>
+                </div>
+                <p className="text-neutral-300 text-sm bg-[#1a1a1a] rounded-xl p-3 mb-3">{msg.mensaje}</p>
+                {!msg.leido && (
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/admin/mensajes", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: msg.id }),
+                      });
+                      cargarMensajes();
+                    }}
+                    className="text-xs text-[#e8b800] hover:underline font-bold"
+                  >
+                    ✓ Marcar como leído
+                  </button>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* TAB GANADORES */}
+        {tab === "ganadores" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">Ganadores</p>
+              <button
+                onClick={() => setMostrarGanadorForm(!mostrarGanadorForm)}
+                className="bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white font-black text-sm uppercase tracking-widest px-5 py-2.5 rounded-xl hover:brightness-110 transition-all"
+              >
+                + Nuevo ganador
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {mostrarGanadorForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-3"
+                >
+                  <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Agregar ganador</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Sorteo ID</label>
+                      <input className={inputClass} placeholder="abril" value={nuevoGanador.sorteo_id} onChange={e => setNuevoGanador({ ...nuevoGanador, sorteo_id: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Nombre</label>
+                      <input className={inputClass} placeholder="Juan P." value={nuevoGanador.nombre} onChange={e => setNuevoGanador({ ...nuevoGanador, nombre: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Premio</label>
+                      <input className={inputClass} placeholder="🚗 Ford Ranger" value={nuevoGanador.premio} onChange={e => setNuevoGanador({ ...nuevoGanador, premio: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Emoji</label>
+                      <input className={inputClass} placeholder="🏆" value={nuevoGanador.emoji} onChange={e => setNuevoGanador({ ...nuevoGanador, emoji: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-neutral-500 mb-1 block">Fecha</label>
+                      <input className={inputClass} placeholder="Abril 2026" value={nuevoGanador.fecha} onChange={e => setNuevoGanador({ ...nuevoGanador, fecha: e.target.value })} />
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/admin/ganadores", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(nuevoGanador),
+                      });
+                      setMostrarGanadorForm(false);
+                      cargarGanadores();
+                    }}
+                    className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all"
+                  >
+                    ✅ Agregar ganador
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="space-y-3">
+              {ganadores.length === 0 ? (
+                <p className="text-neutral-500 text-center py-12">No hay ganadores registrados</p>
+              ) : ganadores.map((g) => (
+                <div
+                  key={g.id}
+                  className={`bg-[#111] border-2 rounded-2xl p-4 flex items-center justify-between gap-4 ${
+                    g.visible ? "border-neutral-800" : "border-neutral-700 opacity-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{g.emoji}</span>
+                    <div>
+                      <p className="font-black text-white">{g.nombre}</p>
+                      <p className="text-[#e8b800] text-sm">{g.premio}</p>
+                      <p className="text-neutral-500 text-xs">{g.sorteo_id} · {g.fecha}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/admin/ganadores", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: g.id, visible: !g.visible }),
+                      });
+                      cargarGanadores();
+                    }}
+                    className={`text-xs font-black px-3 py-1.5 rounded-lg border transition-all ${
+                      g.visible
+                        ? "bg-red-600/20 border-red-600/40 text-red-400 hover:bg-red-600/30"
+                        : "bg-green-600/20 border-green-600/40 text-green-400 hover:bg-green-600/30"
+                    }`}
+                  >
+                    {g.visible ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB EMPRESAS */}
+        {tab === "empresas" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">Empresas donantes</p>
+              <button
+                onClick={() => setMostrarEmpresaForm(!mostrarEmpresaForm)}
+                className="bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white font-black text-sm uppercase tracking-widest px-5 py-2.5 rounded-xl hover:brightness-110 transition-all"
+              >
+                + Nueva empresa
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {mostrarEmpresaForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-3"
+                >
+                  <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Agregar empresa</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {([
+                      ["id",          "ID único (ej: mi-empresa)",  "mi-empresa"],
+                      ["nombre",      "Nombre",                     "Mi Empresa S.A.C."],
+                      ["descripcion", "Descripción",                "Descripción breve"],
+                      ["categoria",   "Categoría",                  "Tecnología"],
+                      ["emoji",       "Emoji",                      "🏢"],
+                      ["whatsapp",    "WhatsApp (sin +)",            "51999000000"],
+                      ["telefono",    "Teléfono",                   "+51 999 000 000"],
+                      ["instagram",   "Instagram (sin @)",          "miempresa"],
+                      ["facebook",    "Facebook",                   "miempresa"],
+                      ["tiktok",      "TikTok (sin @)",             "miempresa"],
+                    ] as [string, string, string][]).map(([field, label, placeholder]) => (
+                      <div key={field}>
+                        <label className="text-xs text-neutral-500 mb-1 block">{label}</label>
+                        <input
+                          className={inputClass}
+                          placeholder={placeholder}
+                          value={(nuevaEmpresa as Record<string, string>)[field]}
+                          onChange={e => setNuevaEmpresa({ ...nuevaEmpresa, [field]: e.target.value })}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/admin/empresas", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(nuevaEmpresa),
+                      });
+                      setMostrarEmpresaForm(false);
+                      cargarEmpresas();
+                    }}
+                    className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all"
+                  >
+                    ✅ Crear empresa
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="space-y-3">
+              {empresas.length === 0 ? (
+                <p className="text-neutral-500 text-center py-12">No hay empresas registradas</p>
+              ) : empresas.map((emp) => (
+                <div
+                  key={emp.id}
+                  className={`bg-[#111] border-2 rounded-2xl p-4 flex items-center justify-between gap-4 ${
+                    emp.activo ? "border-green-600/30" : "border-neutral-800 opacity-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{emp.emoji}</span>
+                    <div>
+                      <p className="font-black text-white">{emp.nombre}</p>
+                      <p className="text-neutral-500 text-xs uppercase tracking-wide">{emp.categoria}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/admin/empresas", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: emp.id, activo: !emp.activo }),
+                      });
+                      cargarEmpresas();
+                    }}
+                    className={`text-xs font-black px-3 py-1.5 rounded-lg border transition-all ${
+                      emp.activo
+                        ? "bg-red-600/20 border-red-600/40 text-red-400 hover:bg-red-600/30"
+                        : "bg-green-600/20 border-green-600/40 text-green-400 hover:bg-green-600/30"
+                    }`}
+                  >
+                    {emp.activo ? "Desactivar" : "Activar"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Modal comprobante */}

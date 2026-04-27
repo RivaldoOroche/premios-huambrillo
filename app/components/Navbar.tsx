@@ -10,15 +10,11 @@ export default function Navbar() {
         </a>
 
         <div className="flex flex-wrap justify-center gap-2">
-          <a href="#" className="nav-link">🎫 Mis Tickets</a>
-          <a href="#" className="nav-link">📣 Canal</a>
-          <a href="#" className="nav-link">🏆 Ganadores</a>
-          <a href="#" className="nav-link nav-link-red">💬 WhatsApp</a>
-          <a href="#" className="nav-link">🔵 Facebook</a>
           <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link>
           <Link href="/empresas" className="nav-link">🏢 Empresas</Link>
           <Link href="/como-participar" className="nav-link">❓ ¿Cómo participar?</Link>
           <Link href="/contacto" className="nav-link">📬 Contacto</Link>
+          <Link href="/mis-tickets" className="nav-link">🎫 Mis Tickets</Link>
         </div>
 
       </div>
