@@ -13,14 +13,21 @@ export default function FormularioContacto() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEstado("enviando");
-    // Simulación — aquí conectarías tu servicio de email
-    await new Promise((r) => setTimeout(r, 1500));
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setEstado("enviando");
+  try {
+    const res = await fetch("/api/contacto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    if (!res.ok) throw new Error();
     setEstado("enviado");
-  };
-
+  } catch {
+    setEstado("error");
+  }
+};
   const inputClass = "w-full bg-[#1a1a1a] border-2 border-neutral-700 rounded-xl px-4 py-3 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:border-[#e8b800] transition-colors";
 
   return (
