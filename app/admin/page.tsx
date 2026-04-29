@@ -6,6 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 type Tab = "tickets" | "sorteos" | "mensajes" | "ganadores" | "empresas";
 type EstadoTicket = "pendiente" | "confirmado" | "rechazado";
 
+interface Premio {
+  cantidad: number;
+  nombre: string;
+  esMayor: boolean;
+}
+
 interface Mensaje {
   id: string;
   nombre: string;
@@ -74,8 +80,9 @@ export default function AdminPanel() {
   const [nuevoSorteo, setNuevoSorteo] = useState({
     sorteo_id: "", badge: "", fecha: "", fecha_sorteo: "",
     titulo: "", precio: 0, total_tickets: 1000, es_especial: false,
-    premios: "[]",
   });
+  const [listaPremioss, setListaPremioss] = useState<Premio[]>([]);
+  const [premioTemp, setPremioTemp] = useState<Premio>({ cantidad: 1, nombre: "", esMayor: false });
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [ganadores, setGanadores] = useState<GanadorAdmin[]>([]);
   const [empresas, setEmpresas] = useState<EmpresaAdmin[]>([]);
@@ -165,14 +172,29 @@ export default function AdminPanel() {
     cargarSorteos();
   };
 
+  const agregarPremio = () => {
+    if (!premioTemp.nombre.trim()) return;
+    setListaPremioss([...listaPremioss, { ...premioTemp }]);
+    setPremioTemp({ cantidad: 1, nombre: "", esMayor: false });
+  };
+
   const crearSorteo = async () => {
-    const body = { ...nuevoSorteo, premios: JSON.parse(nuevoSorteo.premios) };
+    if (listaPremioss.length === 0) {
+      alert("Agrega al menos un premio");
+      return;
+    }
+    const body = { ...nuevoSorteo, premios: listaPremioss };
     await fetch("/api/admin/sorteos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     setMostrarSorteoForm(false);
+    setListaPremioss([]);
+    setNuevoSorteo({
+      sorteo_id: "", badge: "", fecha: "", fecha_sorteo: "",
+      titulo: "", precio: 0, total_tickets: 1000, es_especial: false,
+    });
     cargarSorteos();
   };
 
@@ -348,9 +370,11 @@ export default function AdminPanel() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-3"
+                  className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-4"
                 >
                   <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Crear nuevo sorteo</p>
+
+                  {/* Datos generales */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-neutral-500 mb-1 block">ID único (ej: junio)</label>
@@ -369,7 +393,7 @@ export default function AdminPanel() {
                       <input className={inputClass} placeholder="Sorteo 30 de Junio" value={nuevoSorteo.fecha} onChange={e => setNuevoSorteo({ ...nuevoSorteo, fecha: e.target.value })} />
                     </div>
                     <div>
-                      <label className="text-xs text-neutral-500 mb-1 block">Fecha sorteo</label>
+                      <label className="text-xs text-neutral-500 mb-1 block">Fecha y hora del sorteo</label>
                       <input className={inputClass} type="datetime-local" value={nuevoSorteo.fecha_sorteo} onChange={e => setNuevoSorteo({ ...nuevoSorteo, fecha_sorteo: e.target.value })} />
                     </div>
                     <div>
@@ -377,19 +401,98 @@ export default function AdminPanel() {
                       <input className={inputClass} type="number" value={nuevoSorteo.precio} onChange={e => setNuevoSorteo({ ...nuevoSorteo, precio: parseInt(e.target.value) })} />
                     </div>
                     <div>
-                      <label className="text-xs text-neutral-500 mb-1 block">Total tickets</label>
+                      <label className="text-xs text-neutral-500 mb-1 block">Total tickets disponibles</label>
                       <input className={inputClass} type="number" value={nuevoSorteo.total_tickets} onChange={e => setNuevoSorteo({ ...nuevoSorteo, total_tickets: parseInt(e.target.value) })} />
                     </div>
                     <div className="flex items-center gap-2 pt-4">
                       <input type="checkbox" id="especial" checked={nuevoSorteo.es_especial} onChange={e => setNuevoSorteo({ ...nuevoSorteo, es_especial: e.target.checked })} />
-                      <label htmlFor="especial" className="text-sm text-neutral-400">¿Es sorteo especial?</label>
+                      <label htmlFor="especial" className="text-sm text-neutral-400">⭐ Es sorteo especial (dorado)</label>
                     </div>
                   </div>
-                  <div>
-                    <label className="text-xs text-neutral-500 mb-1 block">Premios (JSON)</label>
-                    <textarea className={inputClass + " h-32 resize-none font-mono text-xs"} value={nuevoSorteo.premios} onChange={e => setNuevoSorteo({ ...nuevoSorteo, premios: e.target.value })} />
+
+                  {/* Premios visual */}
+                  <div className="space-y-3">
+                    <label className="text-xs text-neutral-500 uppercase tracking-widest block">🎁 Premios</label>
+
+                    {/* Lista de premios agregados */}
+                    {listaPremioss.length > 0 && (
+                      <div className="space-y-2">
+                        {listaPremioss.map((p, i) => (
+                          <div key={i} className={`flex items-center justify-between gap-2 p-3 rounded-xl border ${
+                            p.esMayor ? "border-[#e8b800]/40 bg-[#e8b800]/5" : "border-neutral-700 bg-[#1a1a1a]"
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <span className="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded min-w-[28px] text-center">
+                                {p.cantidad}
+                              </span>
+                              <span className={`text-sm ${p.esMayor ? "text-[#e8b800] font-black" : "text-white"}`}>
+                                {p.nombre} {p.esMayor && "⭐"}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => setListaPremioss(listaPremioss.filter((_, j) => j !== i))}
+                              className="text-red-500 hover:text-red-400 text-xl font-black leading-none"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Formulario agregar premio */}
+                    <div className="bg-[#1a1a1a] border border-neutral-700 rounded-xl p-4 space-y-3">
+                      <p className="text-xs text-neutral-500 uppercase tracking-widest">Agregar premio</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-xs text-neutral-600 mb-1 block">Cantidad</label>
+                          <input
+                            type="number"
+                            min={1}
+                            className={inputClass}
+                            value={premioTemp.cantidad}
+                            onChange={e => setPremioTemp({ ...premioTemp, cantidad: parseInt(e.target.value) || 1 })}
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-xs text-neutral-600 mb-1 block">Nombre del premio</label>
+                          <input
+                            className={inputClass}
+                            placeholder="🚗 Toyota Yaris"
+                            value={premioTemp.nombre}
+                            onChange={e => setPremioTemp({ ...premioTemp, nombre: e.target.value })}
+                            onKeyDown={e => { if (e.key === "Enter") agregarPremio(); }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={premioTemp.esMayor}
+                            onChange={e => setPremioTemp({ ...premioTemp, esMayor: e.target.checked })}
+                          />
+                          <span className="text-xs text-neutral-400">⭐ Es el premio mayor</span>
+                        </label>
+                        <button
+                          onClick={agregarPremio}
+                          className="text-xs bg-[#e8b800] text-black font-black px-4 py-1.5 rounded-lg hover:brightness-110 transition-all"
+                        >
+                          + Agregar
+                        </button>
+                      </div>
+                    </div>
+
+                    {listaPremioss.length === 0 && (
+                      <p className="text-xs text-neutral-600 text-center">Agrega al menos un premio para continuar</p>
+                    )}
                   </div>
-                  <button onClick={crearSorteo} className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all">
+
+                  <button
+                    onClick={crearSorteo}
+                    disabled={listaPremioss.length === 0}
+                    className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
                     ✅ Crear sorteo
                   </button>
                 </motion.div>
