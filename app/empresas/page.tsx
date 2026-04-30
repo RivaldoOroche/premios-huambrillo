@@ -18,7 +18,7 @@ export default async function PaginaEmpresas() {
         <FadeIn>
           <span className="text-5xl block mb-3">🏢</span>
           <h1 className="font-bebas text-5xl sm:text-7xl tracking-[5px] uppercase text-[#e8b800] mb-2">
-            Empresas Donantes
+            Empresas Aliadas
           </h1>
           <p className="text-neutral-400 text-sm uppercase tracking-widest max-w-lg mx-auto">
             Conoce las empresas y emprendedores que hacen posibles nuestros premios
@@ -90,7 +90,7 @@ export default async function PaginaEmpresas() {
 
         <FadeIn delay={0.3}>
           <div className="mt-12 bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-8 text-center">
-            <p className="font-bebas text-3xl text-[#e8b800] tracking-widest mb-2">¿Quieres ser empresa donante?</p>
+            <p className="font-bebas text-3xl text-[#e8b800] tracking-widest mb-2">¿Quieres ser una empresa aliada?</p>
             <p className="text-neutral-400 text-sm mb-6 max-w-md mx-auto">
               Dale visibilidad a tu negocio participando como donante en nuestros sorteos.
             </p>
