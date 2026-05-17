@@ -55,11 +55,47 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   if (!verificarAdmin(req)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const { id, ...body } = await req.json();
-  const { error } = await supabaseAdmin
-    .from("empresas")
-    .update(body)
-    .eq("id", id);
+
+  const contentType = req.headers.get("content-type") || "";
+
+  if (contentType.includes("multipart/form-data")) {
+    const formData = await req.formData();
+    const id = formData.get("id") as string;
+    const logo = formData.get("logo") as File | null;
+
+    const campos = [
+      "nombre", "descripcion", "categoria", "emoji",
+      "whatsapp", "telefono", "instagram", "facebook", "tiktok",
+      "mision", "vision",
+    ];
+
+    const body: Record<string, string> = {};
+    campos.forEach(campo => {
+      const val = formData.get(campo) as string;
+      if (val !== null) body[campo] = val;
+    });
+
+    if (logo && logo.size > 0) {
+      const fileName = `${id}-${Date.now()}.${logo.name.split(".").pop()}`;
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from("logos")
+        .upload(fileName, logo, { upsert: true });
+      if (!uploadError) {
+        const { data: urlData } = supabaseAdmin.storage
+          .from("logos")
+          .getPublicUrl(fileName);
+        body.logo_url = urlData.publicUrl;
+      }
+    }
+
+    const { error } = await supabaseAdmin.from("empresas").update(body).eq("id", id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
+  // JSON normal (toggle activo)
+  const { id, ...rest } = await req.json();
+  const { error } = await supabaseAdmin.from("empresas").update(rest).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
