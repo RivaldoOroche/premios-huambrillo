@@ -40,6 +40,9 @@ export interface Empresa {
   instagram?: string;
   facebook?: string;
   tiktok?: string;
-  sorteos: string[]; // ids de sorteos en que participó
+  sorteos: string[];
   productos: Producto[];
+  logo_url?: string;
+  mision?: string;
+  vision?: string;
 }

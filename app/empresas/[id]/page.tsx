@@ -25,16 +25,32 @@ export default async function PerfilEmpresa({ params }: Props) {
   return (
     <main className="bg-[#0a0a0a] min-h-screen text-white">
       <Navbar />
+        <section className="relative bg-[#0d0d0d] text-center py-12 px-4 border-b-2 border-[#e8b800] overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,184,0,0.07)_0%,_transparent_70%)] pointer-events-none" />
 
-      <section className="relative bg-[#0d0d0d] text-center py-12 px-4 border-b-2 border-[#e8b800] overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,184,0,0.07)_0%,_transparent_70%)] pointer-events-none" />
-        <span className="text-6xl block mb-3">{empresa.emoji}</span>
-        <div className="inline-block bg-[#e8b800] text-black text-xs font-black px-3 py-1 rounded-full tracking-widest uppercase mb-3">
-          {empresa.categoria}
-        </div>
-        <h1 className="font-bebas text-4xl sm:text-6xl tracking-[4px] uppercase text-white mb-2">{empresa.nombre}</h1>
-        <p className="text-neutral-400 text-sm max-w-lg mx-auto leading-relaxed">{empresa.descripcion}</p>
-      </section>
+          {/* Logo o emoji */}
+          <div className="mb-4 flex justify-center">
+            {empresa.logo_url ? (
+              <img
+                src={empresa.logo_url}
+                alt={empresa.nombre}
+                className="w-28 h-28 object-contain rounded-2xl bg-white p-2"
+              />
+            ) : (
+              <span className="text-6xl">{empresa.emoji}</span>
+            )}
+          </div>
+
+          <div className="inline-block bg-[#e8b800] text-black text-xs font-black px-3 py-1 rounded-full tracking-widest uppercase mb-3">
+            {empresa.categoria}
+          </div>
+          <h1 className="font-bebas text-4xl sm:text-6xl tracking-[4px] uppercase text-white mb-2">
+            {empresa.nombre}
+          </h1>
+          <p className="text-neutral-400 text-sm max-w-lg mx-auto leading-relaxed">
+            {empresa.descripcion}
+          </p>
+        </section>
 
       <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
 
@@ -82,7 +98,27 @@ export default async function PerfilEmpresa({ params }: Props) {
             )}
           </div>
         </section>
-
+        {/* Misión y Visión */}
+        {(empresa.mision || empresa.vision) && (
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {empresa.mision && (
+              <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5 hover:border-[#e8b800]/30 transition-all">
+                <h2 className="font-bebas text-xl tracking-widest text-[#e8b800] uppercase mb-3">
+                  🎯 Misión
+                </h2>
+                <p className="text-neutral-400 text-sm leading-relaxed">{empresa.mision}</p>
+              </div>
+            )}
+            {empresa.vision && (
+              <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5 hover:border-[#e8b800]/30 transition-all">
+                <h2 className="font-bebas text-xl tracking-widest text-[#e8b800] uppercase mb-3">
+                  🔭 Visión
+                </h2>
+                <p className="text-neutral-400 text-sm leading-relaxed">{empresa.vision}</p>
+              </div>
+            )}
+          </section>
+        )}
         {/* Productos */}
         {empresa.productos?.length > 0 && (
           <section>

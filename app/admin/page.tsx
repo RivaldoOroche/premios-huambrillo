@@ -33,11 +33,14 @@ interface GanadorAdmin {
 }
 
 interface EmpresaAdmin {
-    id: string;
-    nombre: string;
-    categoria: string;
-    emoji: string;
-    activo: boolean;
+  id: string;
+  nombre: string;
+  categoria: string;
+  emoji: string;
+  activo: boolean;
+  logo_url?: string;
+  mision?: string;
+  vision?: string;
 }
 
 interface Ticket {
@@ -100,9 +103,11 @@ export default function AdminPanel() {
     });
     const [mostrarGanadorForm, setMostrarGanadorForm] = useState(false);
     const [nuevaEmpresa, setNuevaEmpresa] = useState({
-        id: "", nombre: "", descripcion: "", categoria: "", emoji: "🏢",
-        whatsapp: "", telefono: "", instagram: "", facebook: "", tiktok: "",
+    id: "", nombre: "", descripcion: "", categoria: "", emoji: "🏢",
+    whatsapp: "", telefono: "", instagram: "", facebook: "", tiktok: "",
+    mision: "", vision: "",
     });
+    const [logoEmpresa, setLogoEmpresa] = useState<File | null>(null);
     const [mostrarEmpresaForm, setMostrarEmpresaForm] = useState(false);
     const [stats, setStats] = useState<Stats | null>(null);
     const [cargandoStats, setCargandoStats] = useState(false);
@@ -852,41 +857,98 @@ export default function AdminPanel() {
                                     <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Agregar empresa</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {([
-                                            ["id", "ID único (ej: mi-empresa)", "mi-empresa"],
-                                            ["nombre", "Nombre", "Mi Empresa S.A.C."],
-                                            ["descripcion", "Descripción", "Descripción breve"],
-                                            ["categoria", "Categoría", "Tecnología"],
-                                            ["emoji", "Emoji", "🏢"],
-                                            ["whatsapp", "WhatsApp (sin +)", "51999000000"],
-                                            ["telefono", "Teléfono", "+51 999 000 000"],
-                                            ["instagram", "Instagram (sin @)", "miempresa"],
-                                            ["facebook", "Facebook", "miempresa"],
-                                            ["tiktok", "TikTok (sin @)", "miempresa"],
+                                            ["id",          "ID único (ej: mi-empresa)",  "mi-empresa"],
+                                            ["nombre",      "Nombre",                     "Mi Empresa S.A.C."],
+                                            ["descripcion", "Descripción",                "Descripción breve"],
+                                            ["categoria",   "Categoría",                  "Tecnología"],
+                                            ["emoji",       "Emoji (si no hay logo)",      "🏢"],
+                                            ["whatsapp",    "WhatsApp (sin +)",            "51999000000"],
+                                            ["telefono",    "Teléfono",                   "+51 999 000 000"],
+                                            ["instagram",   "Instagram (sin @)",          "miempresa"],
+                                            ["facebook",    "Facebook",                   "miempresa"],
+                                            ["tiktok",      "TikTok (sin @)",             "miempresa"],
                                         ] as [string, string, string][]).map(([field, label, placeholder]) => (
                                             <div key={field}>
-                                                <label className="text-xs text-neutral-500 mb-1 block">{label}</label>
-                                                <input
-                                                    className={inputClass}
-                                                    placeholder={placeholder}
-                                                    value={(nuevaEmpresa as Record<string, string>)[field]}
-                                                    onChange={e => setNuevaEmpresa({ ...nuevaEmpresa, [field]: e.target.value })}
-                                                />
+                                            <label className="text-xs text-neutral-500 mb-1 block">{label}</label>
+                                            <input
+                                                className={inputClass}
+                                                placeholder={placeholder}
+                                                value={(nuevaEmpresa as Record<string, string>)[field]}
+                                                onChange={e => setNuevaEmpresa({ ...nuevaEmpresa, [field]: e.target.value })}
+                                            />
                                             </div>
                                         ))}
-                                    </div>
+
+                                        {/* Misión */}
+                                        <div className="sm:col-span-2">
+                                            <label className="text-xs text-neutral-500 mb-1 block">🎯 Misión</label>
+                                            <textarea
+                                            className={inputClass + " resize-none h-20"}
+                                            placeholder="Nuestra misión es..."
+                                            value={nuevaEmpresa.mision}
+                                            onChange={e => setNuevaEmpresa({ ...nuevaEmpresa, mision: e.target.value })}
+                                            />
+                                        </div>
+
+                                        {/* Visión */}
+                                        <div className="sm:col-span-2">
+                                            <label className="text-xs text-neutral-500 mb-1 block">🔭 Visión</label>
+                                            <textarea
+                                            className={inputClass + " resize-none h-20"}
+                                            placeholder="Nuestra visión es..."
+                                            value={nuevaEmpresa.vision}
+                                            onChange={e => setNuevaEmpresa({ ...nuevaEmpresa, vision: e.target.value })}
+                                            />
+                                        </div>
+
+                                        {/* Logo */}
+                                        <div className="sm:col-span-2">
+                                            <label className="text-xs text-neutral-500 mb-2 block">🖼️ Logo (opcional)</label>
+                                            <label className="flex items-center gap-3 border-2 border-dashed border-neutral-600 rounded-xl p-4 cursor-pointer hover:border-[#e8b800] transition-colors">
+                                            <span className="text-2xl">{logoEmpresa ? "✅" : "📷"}</span>
+                                            <div>
+                                                <p className="text-sm text-white font-bold">
+                                                {logoEmpresa ? logoEmpresa.name : "Subir logo de la empresa"}
+                                                </p>
+                                                <p className="text-xs text-neutral-500">PNG, JPG o WEBP — Opcional</p>
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={e => setLogoEmpresa(e.target.files?.[0] || null)}
+                                            />
+                                            </label>
+                                            {logoEmpresa && (
+                                            <button
+                                                onClick={() => setLogoEmpresa(null)}
+                                                className="mt-1 text-xs text-red-400 hover:underline"
+                                            >
+                                                × Quitar logo
+                                            </button>
+                                            )}
+                                        </div>
+                                        </div>
                                     <button
-                                        onClick={async () => {
-                                            await fetch("/api/admin/empresas", {
-                                                method: "POST",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify(nuevaEmpresa),
-                                            });
-                                            setMostrarEmpresaForm(false);
-                                            cargarEmpresas();
-                                        }}
-                                        className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all"
+                                    onClick={async () => {
+                                        const fd = new FormData();
+                                        Object.entries(nuevaEmpresa).forEach(([key, val]) => {
+                                        if (val) fd.append(key, val);
+                                        });
+                                        if (logoEmpresa) fd.append("logo", logoEmpresa);
+                                        await fetch("/api/admin/empresas", { method: "POST", body: fd });
+                                        setMostrarEmpresaForm(false);
+                                        setLogoEmpresa(null);
+                                        setNuevaEmpresa({
+                                        id: "", nombre: "", descripcion: "", categoria: "", emoji: "🏢",
+                                        whatsapp: "", telefono: "", instagram: "", facebook: "", tiktok: "",
+                                        mision: "", vision: "",
+                                        });
+                                        cargarEmpresas();
+                                    }}
+                                    className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all"
                                     >
-                                        ✅ Crear empresa
+                                    ✅ Crear empresa
                                     </button>
                                 </motion.div>
                             )}
