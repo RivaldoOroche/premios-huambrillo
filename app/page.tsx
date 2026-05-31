@@ -17,7 +17,7 @@ export default async function Home() {
   // console.log("🔥 sorteos:", sorteos);
   // console.log("🔥 ganadores:", ganadores);
   return (
-    <main className="bg-[#0a0a0a] min-h-screen text-white">
+<main className="bg-[#f5f0e8] min-h-screen text-[#1a1a1a]">
       <Navbar />
       <Hero />
       <SorteosSection sorteos={sorteos} />
