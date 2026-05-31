@@ -7,7 +7,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(26,58,42,0.06)_0%,_transparent_60%)] pointer-events-none" />
 
       <img
-        src="/logo_premios_huambrillo.svg"
+        src="/logo_premios_huambrillo_solo_logo.svg"
         alt="Premios Huambrillo"
         className="relative z-10 mx-auto mb-4 h-28 w-auto object-contain drop-shadow-lg"
       />
