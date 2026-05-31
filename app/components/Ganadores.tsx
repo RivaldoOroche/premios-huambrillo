@@ -22,7 +22,7 @@ export default function Ganadores({ ganadores = [] }: Props) {
         <h2 className="text-center text-3xl sm:text-4xl font-bebas tracking-widest uppercase text-[#e8b800] mb-2">
           Nuestros Ganadores
         </h2>
-        <div className="w-20 h-1 bg-red-600 mx-auto rounded mb-10" />
+        <div className="w-20 h-1 bg-[#c9a84c] mx-auto rounded mb-10" />
       </FadeIn>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
