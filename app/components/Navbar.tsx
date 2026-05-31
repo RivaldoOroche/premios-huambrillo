@@ -14,7 +14,8 @@ export default function Navbar() {
         </Link>
 
         <div className="flex flex-wrap justify-center gap-2">
-          <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link>
+          {/* <Link href="/ganadores" className="nav-link">🏆 Ganadores</Link> */}
+          <Link href="/proximamente" className="nav-link">🏆 Ganadores</Link>
           <Link href="/empresas" className="nav-link">🏢 Empresas</Link>
           <Link href="/como-participar" className="nav-link">❓ ¿Cómo participan?</Link>
           <Link href="/contacto" className="nav-link">📬 Contacto</Link>
