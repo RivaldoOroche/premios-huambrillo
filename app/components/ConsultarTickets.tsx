@@ -13,10 +13,10 @@ interface Ticket {
 }
 
 const estadoConfig: Record<string, { label: string; color: string; emoji: string }> = {
-  pendiente:  { label: "Pendiente",  color: "bg-yellow-500/20 border-yellow-500/40 text-yellow-400", emoji: "⏳" },
-  confirmado: { label: "Confirmado", color: "bg-green-600/20 border-green-600/40 text-green-400",  emoji: "✅" },
-  rechazado:  { label: "Rechazado",  color: "bg-red-600/20 border-red-600/40 text-red-400",        emoji: "❌" },
-  reservado:  { label: "Reservado",  color: "bg-blue-600/20 border-blue-600/40 text-blue-400",     emoji: "🔒" },
+  pendiente:  { label: "Pendiente",  color: "bg-yellow-500/20 border-yellow-500/40 text-yellow-600", emoji: "⏳" },
+  confirmado: { label: "Confirmado", color: "bg-green-600/20 border-green-600/40 text-green-600",   emoji: "✅" },
+  rechazado:  { label: "Rechazado",  color: "bg-red-600/20 border-red-600/40 text-red-600",         emoji: "❌" },
+  reservado:  { label: "Reservado",  color: "bg-blue-600/20 border-blue-600/40 text-blue-600",      emoji: "🔒" },
 };
 
 export default function ConsultarTickets() {
@@ -39,7 +39,7 @@ export default function ConsultarTickets() {
   return (
     <div className="space-y-6">
       {/* Buscador */}
-      <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-6">
+      <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-6 shadow-sm">
         <p className="text-xs text-neutral-500 uppercase tracking-widest mb-4">
           Ingresa tu número de WhatsApp con el que compraste
         </p>
@@ -50,12 +50,12 @@ export default function ConsultarTickets() {
             onChange={(e) => setTelefono(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && buscar()}
             placeholder="Ej: 999 000 000"
-            className="flex-1 bg-[#1a1a1a] border-2 border-neutral-700 rounded-xl px-4 py-3 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:border-[#e8b800] transition-colors"
+            className="flex-1 bg-white border-2 border-[#c9a84c]/30 rounded-xl px-4 py-3 text-[#1a1a1a] text-sm placeholder:text-neutral-400 focus:outline-none focus:border-[#c9a84c] transition-colors"
           />
           <button
             onClick={buscar}
             disabled={cargando}
-            className="bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
+            className="bg-[#c9a84c] hover:bg-[#e0c068] text-[#1a3a2a] font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:scale-105 transition-all disabled:opacity-50 shadow-md"
           >
             {cargando ? "..." : "Buscar"}
           </button>
@@ -72,15 +72,15 @@ export default function ConsultarTickets() {
             className="space-y-4"
           >
             {tickets.length === 0 ? (
-              <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-8 text-center">
+              <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-8 text-center shadow-sm">
                 <span className="text-4xl block mb-3">🔍</span>
-                <p className="text-neutral-400 font-bold">No encontramos tickets con ese número.</p>
-                <p className="text-neutral-600 text-sm mt-1">Verifica que el número sea el mismo con el que compraste.</p>
+                <p className="text-neutral-600 font-bold">No encontramos tickets con ese número.</p>
+                <p className="text-neutral-400 text-sm mt-1">Verifica que el número sea el mismo con el que compraste.</p>
               </div>
             ) : (
               <>
                 <p className="text-neutral-500 text-sm">
-                  Se encontraron <strong className="text-[#e8b800]">{tickets.length} ticket(s)</strong>
+                  Se encontraron <strong className="text-[#1a3a2a]">{tickets.length} ticket(s)</strong>
                 </p>
                 {tickets.map((ticket, i) => {
                   const cfg = estadoConfig[ticket.estado] ?? estadoConfig.reservado;
@@ -90,19 +90,19 @@ export default function ConsultarTickets() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
-                      className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5 hover:border-[#e8b800]/30 transition-all"
+                      className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-5 hover:border-[#c9a84c] transition-all shadow-sm"
                     >
                       <div className="flex items-center justify-between flex-wrap gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="bg-[#e8b800] text-black font-black text-base px-3 py-0.5 rounded-lg">
+                            <span className="bg-[#c9a84c] text-[#1a3a2a] font-black text-base px-3 py-0.5 rounded-lg">
                               #{String(ticket.numero).padStart(4, "0")}
                             </span>
-                            <span className="text-xs bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                            <span className="text-xs bg-[#1a3a2a]/10 text-[#1a3a2a] px-2 py-0.5 rounded-full uppercase tracking-wide">
                               {ticket.sorteo_id}
                             </span>
                           </div>
-                          <p className="text-neutral-500 text-xs">
+                          <p className="text-neutral-400 text-xs">
                             {new Date(ticket.created_at).toLocaleString("es-PE")}
                           </p>
                         </div>
@@ -112,17 +112,17 @@ export default function ConsultarTickets() {
                       </div>
 
                       {ticket.estado === "pendiente" && (
-                        <p className="text-yellow-400/70 text-xs mt-3 bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-2">
+                        <p className="text-yellow-600/80 text-xs mt-3 bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-2">
                           ⏳ Tu comprobante está siendo revisado. Te confirmaremos pronto.
                         </p>
                       )}
                       {ticket.estado === "confirmado" && (
-                        <p className="text-green-400/70 text-xs mt-3 bg-green-600/5 border border-green-600/20 rounded-lg p-2">
+                        <p className="text-green-600/80 text-xs mt-3 bg-green-600/5 border border-green-600/20 rounded-lg p-2">
                           ✅ Tu ticket está confirmado y participará en el sorteo. ¡Buena suerte!
                         </p>
                       )}
                       {ticket.estado === "rechazado" && (
-                        <p className="text-red-400/70 text-xs mt-3 bg-red-600/5 border border-red-600/20 rounded-lg p-2">
+                        <p className="text-red-600/80 text-xs mt-3 bg-red-600/5 border border-red-600/20 rounded-lg p-2">
                           ❌ Tu comprobante fue rechazado. Contáctanos por WhatsApp para más información.
                         </p>
                       )}
