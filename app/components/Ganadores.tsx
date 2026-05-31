@@ -28,8 +28,8 @@ export default function Ganadores({ ganadores = [] }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {ganadores.map((g, i) => (
           <FadeIn key={g.id} delay={i * 0.05}>
-            <div className="bg-[#111] border-2 border-neutral-700 rounded-xl overflow-hidden hover:border-[#e8b800] hover:-translate-y-1 transition-all duration-200 cursor-pointer">
-              <div className="aspect-[4/3] bg-[#1a1a1a] flex items-center justify-center text-4xl sm:text-5xl">
+            <div className="bg-white border-2 border-neutral-200 rounded-xl overflow-hidden hover:border-[#c9a84c] hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+              <div className="aspect-[4/3] bg-[#f0ede6] flex items-center justify-center text-4xl sm:text-5xl">
                 {g.foto_url ? (
                   <img src={g.foto_url} alt={g.nombre} className="w-full h-full object-cover" />
                 ) : (
