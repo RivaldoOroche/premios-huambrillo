@@ -95,27 +95,39 @@ export default function ComoParticipar() {
         </div>
 
         {/* Métodos de pago */}
-        <FadeIn delay={0.2}>
-          <div className="bg-white border-2 border-[#c9a84c]/40 rounded-2xl p-6 shadow-sm">
-            <h2 className="font-bebas text-2xl tracking-widest text-[#1a3a2a] uppercase mb-4 text-center">
-              💳 Métodos de Pago Aceptados
-            </h2>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              {metodos.map((m, i) => (
-                <div key={i} className={`flex items-center justify-center gap-3 p-4 rounded-xl border-2 ${m.color}`}>
-                  <span className="text-3xl">{m.emoji}</span>
-                  <span className={`font-bebas text-2xl tracking-widest ${m.textColor}`}>{m.nombre}</span>
-                </div>
-              ))}
-            </div>
-            <div className="bg-[#1a3a2a]/5 border border-[#c9a84c]/40 rounded-xl p-4 text-center">
-              <p className="text-xs text-neutral-500 mb-1">Verifica siempre que el nombre del destinatario sea:</p>
-              <p className="font-bebas text-xl tracking-widest text-[#1a3a2a]">HUAMBRILLO S.A.C.</p>
-              <p className="text-red-600 text-xs font-bold mt-1">⚠️ Si sale otro nombre, NO realices el pago</p>
-            </div>
-          </div>
-        </FadeIn>
+       <FadeIn delay={0.2}>
+        <div className="mx-auto max-w-4xl w-full bg-white border-2 border-[#c9a84c]/40 rounded-2xl p-6 shadow-sm">
+          <h2 className="font-bebas text-2xl tracking-widest text-[#1a3a2a] uppercase mb-4 text-center">
+            💳 Métodos de Pago Aceptados
+          </h2>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            {metodos.map((m, i) => (
+              <div
+                key={i}
+                className={`flex items-center justify-center gap-3 p-4 rounded-xl border-2 ${m.color}`}
+              >
+                <span className="text-3xl">{m.emoji}</span>
+                <span className={`font-bebas text-2xl tracking-widest ${m.textColor}`}>
+                  {m.nombre}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-[#1a3a2a]/5 border border-[#c9a84c]/40 rounded-xl p-4 text-center">
+            <p className="text-xs text-neutral-500 mb-1">
+              Verifica siempre que el nombre del destinatario sea:
+            </p>
+            <p className="font-bebas text-xl tracking-widest text-[#1a3a2a]">
+              HUAMBRILLO S.A.C.
+            </p>
+            <p className="text-red-600 text-xs font-bold mt-1">
+              ⚠️ Si sale otro nombre, NO realices el pago
+            </p>
+          </div>
+        </div>
+      </FadeIn>
         {/* CTA */}
         <FadeIn delay={0.3}>
           <div className="text-center space-y-4">
