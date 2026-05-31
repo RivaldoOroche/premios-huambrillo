@@ -9,7 +9,7 @@ export default function Hero() {
       <img
         src="/logo_premios_huambrillo_solo_logo.svg"
         alt="Premios Huambrillo"
-        className="relative z-10 mx-auto mb-4 h-28 w-auto object-contain drop-shadow-lg"
+        className="relative z-10 mx-auto mb-4 h-42 w-auto object-contain drop-shadow-lg"
       />
 
       <h1 className="relative z-10 font-bebas text-6xl sm:text-8xl tracking-[6px] uppercase text-[#1a3a2a] leading-none mb-2 drop-shadow-[0_0_30px_rgba(26,58,42,0.2)]">
