@@ -15,7 +15,6 @@ interface Tiempo {
 }
 
 function calcularTiempo(fechaSorteo: string): Tiempo {
-  // Aseguramos que la fecha se interprete correctamente
   const fechaStr = fechaSorteo?.replace(" ", "T");
   const fecha = new Date(fechaStr);
   const diferencia = fecha.getTime() - Date.now();
@@ -62,13 +61,13 @@ export default function Contador({ fechaSorteo, esEspecial }: Props) {
   return (
     <div className="mb-4">
       <p className={`text-xs uppercase tracking-widest text-center mb-2 font-bold ${
-        esEspecial ? "text-yellow-600" : "text-neutral-500"
+        esEspecial ? "text-[#c9a84c]" : "text-neutral-500"
       }`}>
         ⏳ Tiempo restante
       </p>
 
       {terminado ? (
-        <div className="text-center text-red-500 font-black text-lg uppercase tracking-wide">
+        <div className="text-center text-[#1a3a2a] font-black text-lg uppercase tracking-wide">
           ¡Sorteo finalizado!
         </div>
       ) : (
@@ -78,12 +77,12 @@ export default function Contador({ fechaSorteo, esEspecial }: Props) {
               key={u.label}
               className={`rounded-xl p-2 text-center border-2 ${
                 esEspecial
-                  ? "bg-[#e8b800]/10 border-[#e8b800]/30"
-                  : "bg-red-600/10 border-red-600/30"
+                  ? "bg-[#c9a84c]/10 border-[#c9a84c]/30"
+                  : "bg-[#1a3a2a]/10 border-[#1a3a2a]/30"
               }`}
             >
               <p className={`text-2xl sm:text-3xl font-bebas leading-none ${
-                esEspecial ? "text-[#e8b800]" : "text-red-400"
+                esEspecial ? "text-[#c9a84c]" : "text-[#1a3a2a]"
               }`}>
                 {String(u.valor).padStart(2, "0")}
               </p>
