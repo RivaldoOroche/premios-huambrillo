@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f0e8;
+  --foreground: #1a1a1a;
 }
 
 @theme inline {
@@ -14,15 +14,9 @@
 @theme {
   --font-bebas: var(--font-bebas);
   --font-nunito: var(--font-nunito);
-  --color-gold-300: #fde68a;
-  --color-gold-400: #e8b800;
-  --color-gold-500: #d4a800;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-gold-300: #e8d5a3;
+  --color-gold-400: #c9a84c;
+  --color-gold-500: #a8882e;
 }
 
 body {
@@ -32,9 +26,9 @@ body {
 }
 @layer components {
   .nav-link {
-    @apply text-neutral-300 text-xs font-bold px-3 py-1.5 rounded-full border border-neutral-700 hover:bg-[#e8b800] hover:text-black hover:border-[#e8b800] transition-all duration-200;
+    @apply text-neutral-200 text-xs font-bold px-3 py-1.5 rounded-full border border-neutral-500 hover:bg-[#c9a84c] hover:text-black hover:border-[#c9a84c] transition-all duration-200;
   }
   .nav-link-red {
-    @apply border-red-600/50 text-red-400 hover:bg-red-600 hover:text-white hover:border-red-600;
+    @apply border-[#c9a84c]/50 text-[#c9a84c] hover:bg-[#c9a84c] hover:text-black hover:border-[#c9a84c];
   }
 }
