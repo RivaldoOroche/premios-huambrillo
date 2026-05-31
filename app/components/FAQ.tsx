@@ -40,14 +40,14 @@ export default function FAQ() {
         <h2 className="font-bebas text-4xl tracking-widest text-[#e8b800] uppercase text-center mb-2">
           Preguntas Frecuentes
         </h2>
-        <div className="w-16 h-1 bg-red-600 rounded mx-auto mb-10" />
+        <div className="w-16 h-1 bg-[#c9a84c] rounded mx-auto mb-10" />
       </FadeIn>
 
       <div className="space-y-3">
         {preguntas.map((item, i) => (
           <FadeIn key={i} delay={i * 0.05}>
-            <div className={`bg-[#111] border-2 rounded-2xl overflow-hidden transition-all duration-300 ${
-              abierto === i ? "border-[#e8b800]" : "border-neutral-800 hover:border-neutral-600"
+            <div className={`bg-white border-2 rounded-2xl overflow-hidden transition-all duration-300 ${
+              abierto === i ? "border-[#c9a84c]" : "border-neutral-800 hover:border-neutral-600"
             }`}>
               <button
                 onClick={() => setAbierto(abierto === i ? null : i)}
@@ -71,7 +71,7 @@ export default function FAQ() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <p className="px-5 pb-5 text-neutral-400 text-sm leading-relaxed border-t border-neutral-800 pt-4">
+                    <p className="px-5 pb-5 text-neutral-600 text-sm leading-relaxed border-t border-neutral-200 pt-4">
                       {item.respuesta}
                     </p>
                   </motion.div>
