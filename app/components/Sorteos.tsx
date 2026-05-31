@@ -8,7 +8,7 @@ interface Props {
 export default function Sorteos({ sorteos }: Props) {
   if (!sorteos?.length) return (
     <section className="max-w-5xl mx-auto px-4 py-12 text-center">
-      <p className="text-neutral-500">No hay sorteos activos en este momento.</p>
+      <p className="text-neutral-600">No hay sorteos activos en este momento.</p>
     </section>
   );
 
@@ -18,7 +18,7 @@ export default function Sorteos({ sorteos }: Props) {
         <h2 className="text-center font-bebas text-4xl tracking-widest uppercase text-[#e8b800] mb-2">
           Sorteos Activos
         </h2>
-        <div className="w-20 h-1 bg-red-600 mx-auto rounded mb-10" />
+        <div className="w-20 h-1 bg-[#c9a84c] mx-auto rounded mb-10" />
       </FadeIn>
 
       <div className={`grid gap-6 items-stretch ${
