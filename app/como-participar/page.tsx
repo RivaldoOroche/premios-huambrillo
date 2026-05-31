@@ -46,7 +46,7 @@ const pasos = [
 ];
 
 const metodos = [
-  { nombre: "YAPE", emoji: "💜", color: "border-[#c9a84c]/40 bg-[#c9a84c]/10", textColor: "text-[#c9a84c]" },
+  // { nombre: "YAPE", emoji: "💜", color: "border-[#c9a84c]/40 bg-[#c9a84c]/10", textColor: "text-[#c9a84c]" },
   { nombre: "PLIN", emoji: "💙", color: "border-[#1a3a2a] bg-[#1a3a2a]/20", textColor: "text-[#2a5a3a]" },
 ];
 
