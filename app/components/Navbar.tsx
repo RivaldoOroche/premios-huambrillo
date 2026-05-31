@@ -7,7 +7,7 @@ export default function Navbar() {
 
         <Link href="/" className="flex items-center">
           <img
-            src="/image/logo_premios_huambrillo.png"
+            src="/image/logo_premios_huambrillo.svg"
             alt="Premios Huambrillo"
             className="h-16 w-auto"
           />
