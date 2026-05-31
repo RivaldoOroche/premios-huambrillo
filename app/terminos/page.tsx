@@ -4,17 +4,17 @@ import FadeIn from "../components/FadeIn";
 
 export default function Terminos() {
   return (
-    <main className="bg-[#0a0a0a] min-h-screen text-white">
+    <main className="bg-[#f5f0e8] min-h-screen text-[#1a1a1a]">
       <Navbar />
 
-      <section className="relative bg-[#0d0d0d] text-center py-12 px-4 border-b-2 border-[#e8b800] overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(232,184,0,0.07)_0%,_transparent_70%)] pointer-events-none" />
+      <section className="relative bg-[#1a3a2a] text-center py-12 px-4 border-b-2 border-[#c9a84c] overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(201,168,76,0.1)_0%,_transparent_70%)] pointer-events-none" />
         <FadeIn>
           <span className="text-5xl block mb-3">📋</span>
-          <h1 className="font-bebas text-5xl sm:text-6xl tracking-[5px] uppercase text-[#e8b800] mb-2">
+          <h1 className="font-bebas text-5xl sm:text-6xl tracking-[5px] uppercase text-[#c9a84c] mb-2">
             Términos y Condiciones
           </h1>
-          <p className="text-neutral-400 text-sm">Última actualización: Abril 2026</p>
+          <p className="text-white/70 text-sm">Última actualización: Abril 2026</p>
         </FadeIn>
       </section>
 
@@ -50,18 +50,18 @@ export default function Terminos() {
           },
         ].map((seccion, i) => (
           <FadeIn key={i} delay={i * 0.05}>
-            <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-6 hover:border-[#e8b800]/30 transition-all">
-              <h2 className="font-bebas text-xl text-[#e8b800] tracking-widest mb-3">{seccion.titulo}</h2>
-              <p className="text-neutral-400 text-sm leading-relaxed">{seccion.contenido}</p>
+            <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-6 hover:border-[#c9a84c] transition-all shadow-sm">
+              <h2 className="font-bebas text-xl text-[#1a3a2a] tracking-widest mb-3">{seccion.titulo}</h2>
+              <p className="text-neutral-600 text-sm leading-relaxed">{seccion.contenido}</p>
             </div>
           </FadeIn>
         ))}
 
         <FadeIn>
-          <div className="bg-[#1a0a00] border-2 border-[#e8b800]/30 rounded-2xl p-6 text-center">
-            <p className="text-neutral-400 text-sm">
+          <div className="bg-[#1a3a2a]/5 border-2 border-[#c9a84c]/30 rounded-2xl p-6 text-center">
+            <p className="text-neutral-600 text-sm">
               ¿Tienes dudas? Contáctanos en{" "}
-              <a href="/contacto" className="text-[#e8b800] hover:underline font-bold">nuestra página de contacto</a>
+              <a href="/contacto" className="text-[#c9a84c] hover:underline font-bold">nuestra página de contacto</a>
             </p>
           </div>
         </FadeIn>
