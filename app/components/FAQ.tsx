@@ -47,7 +47,7 @@ export default function FAQ() {
         {preguntas.map((item, i) => (
           <FadeIn key={i} delay={i * 0.05}>
             <div className={`bg-white border-2 rounded-2xl overflow-hidden transition-all duration-300 ${
-              abierto === i ? "border-[#c9a84c]" : "border-neutral-800 hover:border-neutral-600"
+              abierto === i ? "border-[#c9a84c]" : "border-neutral-200 hover:border-neutral-400"
             }`}>
               <button
                 onClick={() => setAbierto(abierto === i ? null : i)}
