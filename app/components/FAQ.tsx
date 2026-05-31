@@ -53,7 +53,7 @@ export default function FAQ() {
                 onClick={() => setAbierto(abierto === i ? null : i)}
                 className="w-full flex items-center justify-between p-5 text-left gap-4"
               >
-                <span className="font-bold text-white text-sm sm:text-base">{item.pregunta}</span>
+                <span className="font-bold text-[#c9a84c] text-sm sm:text-base">{item.pregunta}</span>
                 <motion.span
                   animate={{ rotate: abierto === i ? 45 : 0 }}
                   transition={{ duration: 0.2 }}
