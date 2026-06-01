@@ -178,14 +178,26 @@ export default function ComprarTickets({ sorteo }: Props) {
                 </div>
 
                 {/* Instrucción PLIN */}
-                <div className="bg-[#f5f0e8] border border-[#c9a84c]/30 rounded-xl p-4 text-center space-y-1">
-                  <p className="text-xs text-neutral-500 uppercase tracking-widest">💙 Instrucción de pago</p>
-                  <p className="text-sm text-neutral-700 leading-relaxed">
-                    Escanea el QR o paga directo al PLIN{" "}
-                    <strong className="text-[#1a3a2a]">958 748 545</strong>{" "}
-                    a nombre de{" "}
-                    <strong className="text-[#c9a84c]">Cristian Melendez</strong>
-                  </p>
+                <div className="bg-[#f5f0e8] border border-[#c9a84c]/30 rounded-xl p-4 text-center space-y-3">
+                  <div className="space-y-1">
+                    <p className="text-xs text-neutral-500 uppercase tracking-widest">
+                      💙 Instrucción de pago
+                    </p>
+
+                    <p className="text-sm text-neutral-700 leading-relaxed">
+                      Escanea el QR o paga directo al PLIN{" "}
+                      <strong className="text-[#1a3a2a]">958 748 545</strong>{" "}
+                      a nombre de{" "}
+                      <strong className="text-[#c9a84c]">Cristian Melendez</strong>
+                    </p>
+                  </div>
+
+                  <div className="bg-white/60 border border-[#c9a84c]/20 rounded-lg px-3 py-2">
+                    <p className="text-xs text-neutral-600 leading-relaxed">
+                      📸 Guarda una captura de tu pago. 
+                      Te la pediremos como comprobante durante el registro.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Botón QR */}
