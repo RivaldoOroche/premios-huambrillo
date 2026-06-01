@@ -72,7 +72,7 @@ export default function ComprarTickets({ sorteo }: Props) {
               onClick={(e) => e.stopPropagation()}
             >
               <p className="font-bebas text-2xl tracking-widest text-[#1a3a2a] mb-1">QR PLIN</p>
-              <p className="text-xs text-neutral-400 mb-4">Escanea con tu app PLIN</p>
+              <p className="text-xs text-neutral-400 mb-4">Escanea el QR para pagar</p>
               <img
                 src="/QR_PLIN.png"
                 alt="QR PLIN Huambrillo"
