@@ -14,6 +14,8 @@ interface Premio {
   cantidad: number;
   nombre: string;
   esMayor?: boolean;
+  imagen?: string; // 👈 nuevo
+
 }
 
 export default async function DetalleSorteo({ params }: Props) {
@@ -65,29 +67,41 @@ export default async function DetalleSorteo({ params }: Props) {
 
       <div className="max-w-2xl mx-auto px-4 py-10 space-y-8">
 
-        {/* Premios */}
-        <section>
-          <h2 className="font-bebas text-2xl tracking-widest text-[#1a3a2a] uppercase mb-4">
-            🎁 Lista de Premios
-          </h2>
-          <ul className="space-y-3">
-            {premios.map((premio, i) => (
-              <li key={i} className={`flex items-center gap-4 p-4 rounded-xl border-2 ${
-                premio.esMayor
-                  ? "border-[#c9a84c] bg-[#c9a84c]/10"
-                  : "border-[#c9a84c]/20 bg-white shadow-sm"
-              }`}>
-                <span className="bg-[#1a3a2a] text-white font-black text-sm px-3 py-1 rounded-lg min-w-[40px] text-center">
+      {/* Premios */}
+      <section>
+        <h2 className="font-bebas text-2xl tracking-widest text-[#1a3a2a] uppercase mb-4">
+          🎁 Lista de Premios
+        </h2>
+        <ul className="space-y-3">
+          {premios.map((premio, i) => (
+            <li key={i} className={`rounded-xl border-2 overflow-hidden ${
+              premio.esMayor
+                ? "border-[#c9a84c] bg-[#c9a84c]/10"
+                : "border-[#c9a84c]/20 bg-white shadow-sm"
+            }`}>
+              {/* Imagen del premio */}
+              {premio.imagen && (
+                <div className="w-full h-48 overflow-hidden bg-[#f5f0e8]">
+                  <img
+                    src={premio.imagen}
+                    alt={premio.nombre}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex items-center gap-4 p-4">
+                <span className="bg-[#1a3a2a] text-white font-black text-sm px-3 py-1 rounded-lg min-w-[40px] text-center shrink-0">
                   x{premio.cantidad}
                 </span>
                 <span className={`font-bold text-base ${premio.esMayor ? "text-[#c9a84c] text-lg" : "text-neutral-700"}`}>
                   {premio.esMayor && "⭐ "}{premio.nombre}
                   {premio.esMayor && " (Premio Mayor)"}
                 </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
         {/* Comprar tickets */}
         <ComprarTickets sorteo={sorteoAdaptado} />

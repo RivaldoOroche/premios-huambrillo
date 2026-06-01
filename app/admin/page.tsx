@@ -10,6 +10,7 @@ interface Premio {
   cantidad: number;
   nombre: string;
   esMayor: boolean;
+  imagen?: string;
 }
 
 interface Mensaje {
@@ -118,6 +119,8 @@ export default function AdminPanel() {
   });
   const [listaPremioss, setListaPremioss] = useState<Premio[]>([]);
   const [premioTemp, setPremioTemp] = useState<Premio>({ cantidad: 1, nombre: "", esMayor: false });
+  const [imagenesPremios, setImagenesPremios] = useState<Record<number, File>>({});
+  const [imagenesPremiosEdit, setImagenesPremiosEdit] = useState<Record<number, File>>({});
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [ganadores, setGanadores] = useState<GanadorAdmin[]>([]);
   const [empresas, setEmpresas] = useState<EmpresaAdmin[]>([]);
@@ -225,6 +228,14 @@ export default function AdminPanel() {
     cargarSorteos();
   };
 
+  const subirImagenPremio = async (file: File): Promise<string | null> => {
+    const fd = new FormData();
+    fd.append("imagen", file);
+    const res = await fetch("/api/admin/premios/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    return data.url ?? null;
+  };
+
   const agregarPremio = () => {
     if (!premioTemp.nombre.trim()) return;
     setListaPremioss([...listaPremioss, { ...premioTemp }]);
@@ -233,7 +244,18 @@ export default function AdminPanel() {
 
   const crearSorteo = async () => {
     if (listaPremioss.length === 0) { alert("Agrega al menos un premio"); return; }
-    const body = { ...nuevoSorteo, premios: listaPremioss };
+
+    const premiosConImagenes = await Promise.all(
+      listaPremioss.map(async (p, i) => {
+        if (imagenesPremios[i]) {
+          const url = await subirImagenPremio(imagenesPremios[i]);
+          if (url) return { ...p, imagen: url };
+        }
+        return p;
+      })
+    );
+
+    const body = { ...nuevoSorteo, premios: premiosConImagenes };
     await fetch("/api/admin/sorteos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -241,12 +263,24 @@ export default function AdminPanel() {
     });
     setMostrarSorteoForm(false);
     setListaPremioss([]);
+    setImagenesPremios({});
     setNuevoSorteo({ sorteo_id: "", badge: "", fecha: "", fecha_sorteo: "", titulo: "", precio: 0, total_tickets: 1000, es_especial: false });
     cargarSorteos();
   };
 
   const guardarSorteoEditado = async () => {
     if (!sorteoEditando) return;
+
+    const premiosConImagenes = await Promise.all(
+      premioseditando.map(async (p, i) => {
+        if (imagenesPremiosEdit[i]) {
+          const url = await subirImagenPremio(imagenesPremiosEdit[i]);
+          if (url) return { ...p, imagen: url };
+        }
+        return p;
+      })
+    );
+
     await fetch("/api/admin/sorteos", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -259,10 +293,11 @@ export default function AdminPanel() {
         precio: sorteoEditando.precio,
         total_tickets: sorteoEditando.total_tickets,
         es_especial: sorteoEditando.es_especial,
-        premios: premioseditando,
+        premios: premiosConImagenes,
       }),
     });
     setSorteoEditando(null);
+    setImagenesPremiosEdit({});
     cargarSorteos();
   };
 
@@ -287,21 +322,12 @@ export default function AdminPanel() {
   if (!autenticado) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-8 w-full max-w-sm"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-8 w-full max-w-sm">
           <p className="font-bebas text-3xl text-[#e8b800] tracking-widest text-center mb-6">🔐 Panel Admin</p>
           <p className="text-xs text-neutral-500 uppercase tracking-widest mb-1">Contraseña</p>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            placeholder="••••••••"
-            className={inputClass + " mb-3"}
-          />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()} placeholder="••••••••" className={inputClass + " mb-3"} />
           {errorLogin && <p className="text-red-500 text-xs mb-3">⚠️ {errorLogin}</p>}
           <button onClick={handleLogin} className="w-full bg-gradient-to-r from-red-700 via-red-500 to-red-700 text-white font-black uppercase tracking-widest py-3 rounded-xl hover:brightness-110 transition-all">
             Entrar
@@ -314,13 +340,11 @@ export default function AdminPanel() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
 
-      {/* Header */}
       <div className="bg-[#111] border-b-2 border-[#e8b800] px-4 py-3 flex items-center justify-between">
         <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">⚙️ Admin — Premios Huambrillo</p>
         <a href="/" className="text-xs text-neutral-500 hover:text-[#e8b800] transition-colors">← Ver sitio</a>
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b border-neutral-800 px-4 overflow-x-auto">
         {([
           ["dashboard", "📊 Dashboard"],
@@ -330,13 +354,10 @@ export default function AdminPanel() {
           ["ganadores", "🏆 Ganadores"],
           ["empresas",  "🏢 Empresas"],
         ] as [Tab, string][]).map(([t, label]) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
+          <button key={t} onClick={() => setTab(t)}
             className={`px-5 py-3 font-black text-sm uppercase tracking-widest whitespace-nowrap transition-colors relative ${
               tab === t ? "text-[#e8b800] border-b-2 border-[#e8b800]" : "text-neutral-500 hover:text-white"
-            }`}
-          >
+            }`}>
             {label}
             {t === "mensajes" && stats && stats.mensajesNoLeidos > 0 && (
               <span className="absolute top-2 right-1 bg-red-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-black">
@@ -369,7 +390,6 @@ export default function AdminPanel() {
                   </motion.div>
                 ))}
               </div>
-
               <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5">
                 <p className="font-bebas text-xl text-[#e8b800] tracking-widest mb-4">Estado de Tickets</p>
                 <div className="space-y-3">
@@ -384,18 +404,15 @@ export default function AdminPanel() {
                         <span className="font-black">{item.valor} / {item.total}</span>
                       </div>
                       <div className="h-2.5 bg-neutral-800 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
+                        <motion.div initial={{ width: 0 }}
                           animate={{ width: item.total > 0 ? `${(item.valor / item.total) * 100}%` : "0%" }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          className={`h-full rounded-full ${item.color}`}
-                        />
+                          className={`h-full rounded-full ${item.color}`} />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-
               <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5">
                 <p className="font-bebas text-xl text-[#e8b800] tracking-widest mb-4">Ingresos por Sorteo</p>
                 <div className="space-y-4">
@@ -417,18 +434,14 @@ export default function AdminPanel() {
                         <span>{s.vendidos} / {s.total}</span>
                       </div>
                       <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(s.vendidos / s.total) * 100}%` }}
+                        <motion.div initial={{ width: 0 }} animate={{ width: `${(s.vendidos / s.total) * 100}%` }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-red-600 to-[#e8b800] rounded-full"
-                        />
+                          className="h-full bg-gradient-to-r from-red-600 to-[#e8b800] rounded-full" />
                       </div>
                     </motion.div>
                   ))}
                 </div>
               </div>
-
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[
                   { label: "Ver pendientes", accion: () => { setTab("tickets"); setEstadoFiltro("pendiente"); }, color: "border-yellow-500/30 hover:border-yellow-500 text-yellow-400", emoji: "⏳" },
@@ -544,17 +557,36 @@ export default function AdminPanel() {
                     </div>
                   </div>
 
+                  {/* Premios - CREAR */}
                   <div className="space-y-3">
                     <label className="text-xs text-neutral-500 uppercase tracking-widest block">🎁 Premios</label>
                     {listaPremioss.length > 0 && (
                       <div className="space-y-2">
                         {listaPremioss.map((p, i) => (
-                          <div key={i} className={`flex items-center justify-between gap-2 p-3 rounded-xl border ${p.esMayor ? "border-[#e8b800]/40 bg-[#e8b800]/5" : "border-neutral-700 bg-[#1a1a1a]"}`}>
-                            <div className="flex items-center gap-2">
-                              <span className="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded min-w-[28px] text-center">{p.cantidad}</span>
-                              <span className={`text-sm ${p.esMayor ? "text-[#e8b800] font-black" : "text-white"}`}>{p.nombre} {p.esMayor && "⭐"}</span>
-                            </div>
-                            <button onClick={() => setListaPremioss(listaPremioss.filter((_, j) => j !== i))} className="text-red-500 hover:text-red-400 text-xl font-black leading-none">×</button>
+                          <div key={i} className={`flex items-center gap-2 p-3 rounded-xl border ${p.esMayor ? "border-[#e8b800]/40 bg-[#e8b800]/5" : "border-neutral-700 bg-[#1a1a1a]"}`}>
+                            {/* Preview imagen */}
+                            {imagenesPremios[i] ? (
+                              <img src={URL.createObjectURL(imagenesPremios[i])} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                            ) : p.imagen ? (
+                              <img src={p.imagen} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-neutral-800 shrink-0" />
+                            )}
+                            <span className="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded min-w-[28px] text-center">{p.cantidad}</span>
+                            <span className={`text-sm flex-1 ${p.esMayor ? "text-[#e8b800] font-black" : "text-white"}`}>{p.nombre} {p.esMayor && "⭐"}</span>
+                            {/* Botón imagen */}
+                            <label className="text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-300 px-2 py-1 rounded-lg cursor-pointer transition-all shrink-0">
+                              {imagenesPremios[i] ? "✅" : "📷"}
+                              <input type="file" accept="image/*" className="hidden"
+                                onChange={e => {
+                                  const file = e.target.files?.[0];
+                                  if (file) setImagenesPremios(prev => ({ ...prev, [i]: file }));
+                                }} />
+                            </label>
+                            <button onClick={() => {
+                              setListaPremioss(listaPremioss.filter((_, j) => j !== i));
+                              setImagenesPremios(prev => { const n = { ...prev }; delete n[i]; return n; });
+                            }} className="text-red-500 hover:text-red-400 text-xl font-black leading-none shrink-0">×</button>
                           </div>
                         ))}
                       </div>
@@ -563,7 +595,8 @@ export default function AdminPanel() {
                       <p className="text-xs text-neutral-500 uppercase tracking-widest">Agregar premio</p>
                       <div className="grid grid-cols-3 gap-2">
                         <div><label className="text-xs text-neutral-600 mb-1 block">Cantidad</label>
-                          <input type="number" min={1} className={inputClass} value={premioTemp.cantidad} onChange={e => setPremioTemp({ ...premioTemp, cantidad: parseInt(e.target.value) || 1 })} /></div>
+                          <input type="number" min={1} className={inputClass} value={premioTemp.cantidad}
+                            onChange={e => setPremioTemp({ ...premioTemp, cantidad: parseInt(e.target.value) || 1 })} /></div>
                         <div className="col-span-2"><label className="text-xs text-neutral-600 mb-1 block">Nombre del premio</label>
                           <input className={inputClass} placeholder="🚗 Toyota Yaris" value={premioTemp.nombre}
                             onChange={e => setPremioTemp({ ...premioTemp, nombre: e.target.value })}
@@ -613,23 +646,16 @@ export default function AdminPanel() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSorteoEditando({
-                            sorteo_id: sorteo.sorteo_id,
-                            badge: sorteo.badge,
-                            fecha: sorteo.fecha,
-                            fecha_sorteo: sorteo.fecha_sorteo ?? "",
-                            titulo: sorteo.titulo,
-                            precio: sorteo.precio,
-                            total_tickets: sorteo.total_tickets,
-                            es_especial: sorteo.es_especial,
-                            premios: sorteo.premios ?? [],
-                          });
-                          setPremioseditando(sorteo.premios ?? []);
-                        }}
-                        className="text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all bg-blue-600/20 border border-blue-600/40 text-blue-400 hover:bg-blue-600/30"
-                      >
+                      <button onClick={() => {
+                        setSorteoEditando({
+                          sorteo_id: sorteo.sorteo_id, badge: sorteo.badge, fecha: sorteo.fecha,
+                          fecha_sorteo: sorteo.fecha_sorteo ?? "", titulo: sorteo.titulo,
+                          precio: sorteo.precio, total_tickets: sorteo.total_tickets,
+                          es_especial: sorteo.es_especial, premios: sorteo.premios ?? [],
+                        });
+                        setPremioseditando(sorteo.premios ?? []);
+                        setImagenesPremiosEdit({});
+                      }} className="text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all bg-blue-600/20 border border-blue-600/40 text-blue-400 hover:bg-blue-600/30">
                         ✏️ Editar
                       </button>
                       <button onClick={() => toggleSorteo(sorteo.sorteo_id, sorteo.activo)}
@@ -751,7 +777,6 @@ export default function AdminPanel() {
                 + Nueva empresa
               </button>
             </div>
-
             <AnimatePresence>
               {mostrarEmpresaForm && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
@@ -759,16 +784,16 @@ export default function AdminPanel() {
                   <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Agregar empresa</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {([
-                      ["id",          "ID único (ej: mi-empresa)",  "mi-empresa"],
-                      ["nombre",      "Nombre",                     "Mi Empresa S.A.C."],
-                      ["descripcion", "Descripción",                "Descripción breve"],
-                      ["categoria",   "Categoría",                  "Tecnología"],
-                      ["emoji",       "Emoji (si no hay logo)",      "🏢"],
-                      ["whatsapp",    "WhatsApp (sin +)",            "51999000000"],
-                      ["telefono",    "Teléfono",                   "+51 999 000 000"],
-                      ["instagram",   "Instagram (sin @)",          "miempresa"],
-                      ["facebook",    "Facebook",                   "miempresa"],
-                      ["tiktok",      "TikTok (sin @)",             "miempresa"],
+                      ["id", "ID único (ej: mi-empresa)", "mi-empresa"],
+                      ["nombre", "Nombre", "Mi Empresa S.A.C."],
+                      ["descripcion", "Descripción", "Descripción breve"],
+                      ["categoria", "Categoría", "Tecnología"],
+                      ["emoji", "Emoji (si no hay logo)", "🏢"],
+                      ["whatsapp", "WhatsApp (sin +)", "51999000000"],
+                      ["telefono", "Teléfono", "+51 999 000 000"],
+                      ["instagram", "Instagram (sin @)", "miempresa"],
+                      ["facebook", "Facebook", "miempresa"],
+                      ["tiktok", "TikTok (sin @)", "miempresa"],
                     ] as [string, string, string][]).map(([field, label, placeholder]) => (
                       <div key={field}>
                         <label className="text-xs text-neutral-500 mb-1 block">{label}</label>
@@ -815,7 +840,6 @@ export default function AdminPanel() {
                 </motion.div>
               )}
             </AnimatePresence>
-
             <div className="space-y-3">
               {empresas.length === 0 ? (
                 <p className="text-neutral-500 text-center py-12">No hay empresas registradas</p>
@@ -851,7 +875,6 @@ export default function AdminPanel() {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Modal editar empresa */}
@@ -869,15 +892,15 @@ export default function AdminPanel() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[55vh] overflow-y-auto pr-1">
                 {([
-                  ["nombre",      "Nombre",              "Mi Empresa"],
-                  ["descripcion", "Descripción",         "Descripción"],
-                  ["categoria",   "Categoría",           "Tecnología"],
-                  ["emoji",       "Emoji",               "🏢"],
-                  ["whatsapp",    "WhatsApp (sin +)",    "51999000000"],
-                  ["telefono",    "Teléfono",            "+51 999 000 000"],
-                  ["instagram",   "Instagram (sin @)",   "miempresa"],
-                  ["facebook",    "Facebook",            "miempresa"],
-                  ["tiktok",      "TikTok (sin @)",      "miempresa"],
+                  ["nombre", "Nombre", "Mi Empresa"],
+                  ["descripcion", "Descripción", "Descripción"],
+                  ["categoria", "Categoría", "Tecnología"],
+                  ["emoji", "Emoji", "🏢"],
+                  ["whatsapp", "WhatsApp (sin +)", "51999000000"],
+                  ["telefono", "Teléfono", "+51 999 000 000"],
+                  ["instagram", "Instagram (sin @)", "miempresa"],
+                  ["facebook", "Facebook", "miempresa"],
+                  ["tiktok", "TikTok (sin @)", "miempresa"],
                 ] as [string, string, string][]).map(([field, label, placeholder]) => (
                   <div key={field}>
                     <label className="text-xs text-neutral-500 mb-1 block">{label}</label>
@@ -961,17 +984,35 @@ export default function AdminPanel() {
                 </div>
               </div>
 
-              {/* Editar premios */}
+              {/* Premios - EDITAR */}
               <div className="space-y-3">
                 <label className="text-xs text-neutral-500 uppercase tracking-widest block">🎁 Premios</label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {premioseditando.map((p, i) => (
-                    <div key={i} className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border ${p.esMayor ? "border-[#e8b800]/40 bg-[#e8b800]/5" : "border-neutral-700 bg-[#1a1a1a]"}`}>
-                      <div className="flex items-center gap-2">
-                        <span className="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded min-w-[24px] text-center">{p.cantidad}</span>
-                        <span className={`text-sm ${p.esMayor ? "text-[#e8b800] font-black" : "text-white"}`}>{p.nombre} {p.esMayor && "⭐"}</span>
-                      </div>
-                      <button onClick={() => setPremioseditando(premioseditando.filter((_, j) => j !== i))} className="text-red-500 hover:text-red-400 text-lg font-black leading-none">×</button>
+                    <div key={i} className={`flex items-center gap-2 p-2.5 rounded-xl border ${p.esMayor ? "border-[#e8b800]/40 bg-[#e8b800]/5" : "border-neutral-700 bg-[#1a1a1a]"}`}>
+                      {/* Preview imagen */}
+                      {imagenesPremiosEdit[i] ? (
+                        <img src={URL.createObjectURL(imagenesPremiosEdit[i])} className="w-8 h-8 object-cover rounded-lg shrink-0" />
+                      ) : p.imagen ? (
+                        <img src={p.imagen} className="w-8 h-8 object-cover rounded-lg shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-neutral-800 shrink-0" />
+                      )}
+                      <span className="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded min-w-[24px] text-center">{p.cantidad}</span>
+                      <span className={`text-sm flex-1 ${p.esMayor ? "text-[#e8b800] font-black" : "text-white"}`}>{p.nombre} {p.esMayor && "⭐"}</span>
+                      {/* Botón imagen */}
+                      <label className="text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-300 px-2 py-1 rounded-lg cursor-pointer transition-all shrink-0">
+                        {imagenesPremiosEdit[i] ? "✅" : p.imagen ? "🔄" : "📷"}
+                        <input type="file" accept="image/*" className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) setImagenesPremiosEdit(prev => ({ ...prev, [i]: file }));
+                          }} />
+                      </label>
+                      <button onClick={() => {
+                        setPremioseditando(premioseditando.filter((_, j) => j !== i));
+                        setImagenesPremiosEdit(prev => { const n = { ...prev }; delete n[i]; return n; });
+                      }} className="text-red-500 hover:text-red-400 text-lg font-black leading-none shrink-0">×</button>
                     </div>
                   ))}
                 </div>
@@ -1011,7 +1052,7 @@ export default function AdminPanel() {
                   className="flex-1 bg-green-600 text-white font-black text-sm uppercase tracking-widest py-3 rounded-xl hover:bg-green-500 transition-all">
                   ✅ Guardar cambios
                 </button>
-                <button onClick={() => setSorteoEditando(null)}
+                <button onClick={() => { setSorteoEditando(null); setImagenesPremiosEdit({}); }}
                   className="px-6 bg-neutral-800 text-neutral-400 font-black text-sm uppercase rounded-xl hover:bg-neutral-700 transition-all">
                   Cancelar
                 </button>
