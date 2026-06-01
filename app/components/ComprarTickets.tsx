@@ -16,6 +16,7 @@ export default function ComprarTickets({ sorteo }: Props) {
   const [error, setError] = useState("");
   const [numerosAsignados, setNumerosAsignados] = useState<number[]>([]);
   const [comprobante, setComprobante] = useState<File | null>(null);
+  const [tipoNumero, setTipoNumero] = useState<"aleatorio" | "correlativo">("aleatorio");
   const [form, setForm] = useState({ nombre: "", telefono: "", email: "", cantidad: 1 });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +32,7 @@ export default function ComprarTickets({ sorteo }: Props) {
       const res = await fetch("/api/tickets/reservar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, sorteo_id: sorteo.id }),
+        body: JSON.stringify({ ...form, sorteo_id: sorteo.id, tipo: tipoNumero }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -110,6 +111,35 @@ export default function ComprarTickets({ sorteo }: Props) {
                 </p>
               </div>
 
+              {/* Tipo de número */}
+              <div>
+                <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-2">Tipo de números</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { valor: "aleatorio", emoji: "🎲", label: "Aleatorio" },
+                    { valor: "correlativo", emoji: "🔢", label: "Correlativo" },
+                  ].map((op) => (
+                    <button
+                      key={op.valor}
+                      type="button"
+                      onClick={() => setTipoNumero(op.valor as "aleatorio" | "correlativo")}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 font-bold text-sm transition-all ${
+                        tipoNumero === op.valor
+                          ? "border-[#c9a84c] bg-[#c9a84c]/10 text-[#1a3a2a]"
+                          : "border-[#c9a84c]/20 bg-white text-neutral-400 hover:border-[#c9a84c]/50"
+                      }`}
+                    >
+                      <span>{op.emoji}</span> {op.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-neutral-400 mt-1">
+                  {tipoNumero === "correlativo"
+                    ? "Recibirás los próximos números disponibles en orden"
+                    : "Recibirás números al azar"}
+                </p>
+              </div>
+
               {error && <p className="text-red-500 text-sm font-bold">⚠️ {error}</p>}
 
               <button
@@ -130,6 +160,7 @@ export default function ComprarTickets({ sorteo }: Props) {
             <motion.div key="pago" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
               <p className="text-xs text-neutral-500 uppercase tracking-widest">Paso 2 — Realiza el pago</p>
 
+              {/* Números asignados */}
               <div className="bg-[#c9a84c]/10 border-2 border-[#c9a84c]/30 rounded-xl p-4">
                 <p className="text-xs text-neutral-500 uppercase tracking-widest mb-2">Tus números de ticket</p>
                 <div className="flex flex-wrap gap-2">
@@ -141,6 +172,7 @@ export default function ComprarTickets({ sorteo }: Props) {
                 </div>
               </div>
 
+              {/* Instrucciones */}
               <div className="bg-[#f5f0e8] border border-[#c9a84c]/30 rounded-xl p-4 space-y-2">
                 <p className="text-xs text-neutral-500 uppercase tracking-widest mb-2">Instrucciones</p>
                 <p className="text-sm text-neutral-700">1. Abre <strong className="text-[#1a3a2a]">YAPE o PLIN</strong></p>
@@ -149,6 +181,32 @@ export default function ComprarTickets({ sorteo }: Props) {
                 <p className="text-sm text-neutral-700">4. Guarda la captura de pantalla</p>
               </div>
 
+              {/* Número y QR */}
+              <div className="grid grid-cols-2 gap-3">
+
+                {/* Número */}
+                <div className="bg-white border-2 border-[#c9a84c]/30 rounded-xl p-4 text-center flex flex-col items-center justify-center gap-2">
+                  <p className="text-xs text-neutral-500 uppercase tracking-widest">📱 Número</p>
+                  <p className="font-bebas text-2xl text-[#1a3a2a] tracking-widest">958 748 545</p>
+                  <div className="flex gap-2">
+                    <span className="text-xs bg-purple-100 text-purple-700 border border-purple-300 px-2 py-0.5 rounded-full font-bold">YAPE</span>
+                    <span className="text-xs bg-blue-100 text-blue-700 border border-blue-300 px-2 py-0.5 rounded-full font-bold">PLIN</span>
+                  </div>
+                </div>
+
+                {/* QR PLIN */}
+                <div className="bg-white border-2 border-[#c9a84c]/30 rounded-xl p-3 text-center flex flex-col items-center justify-center gap-1">
+                  <p className="text-xs text-neutral-500 uppercase tracking-widest">📷 QR PLIN</p>
+                  <img
+                    src="/QR PLIN.jpg"
+                    alt="QR PLIN Huambrillo"
+                    className="w-28 h-28 object-contain rounded-lg"
+                  />
+                </div>
+
+              </div>
+
+              {/* Subir comprobante */}
               <div>
                 <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-2">Sube tu comprobante *</label>
                 <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#c9a84c]/40 rounded-xl p-6 cursor-pointer hover:border-[#c9a84c] transition-colors bg-[#f5f0e8]/50">
