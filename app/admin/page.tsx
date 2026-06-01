@@ -416,30 +416,61 @@ export default function AdminPanel() {
               <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl p-5">
                 <p className="font-bebas text-xl text-[#e8b800] tracking-widest mb-4">Ingresos por Sorteo</p>
                 <div className="space-y-4">
-                  {stats.ingresosPorSorteo.map((s, i) => (
-                    <motion.div key={s.sorteo_id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                      className={`p-4 rounded-xl border-2 ${s.activo ? "border-green-600/20 bg-green-600/5" : "border-neutral-800"}`}>
+                 {stats.ingresosPorSorteo.map((s, i) => {
+                  const confirmados = s.confirmados ?? 0;
+                  const total = s.total ?? 0;
+                  const porcentaje = total > 0 ? Math.min((confirmados / total) * 100, 100) : 0;
+
+                  return (
+                    <motion.div
+                      key={s.sorteo_id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className={`p-4 rounded-xl border-2 ${
+                        s.activo
+                          ? "border-green-600/20 bg-green-600/5"
+                          : "border-neutral-800"
+                      }`}
+                    >
                       <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
                         <div>
-                          <p className="font-bebas text-lg text-white tracking-wide">{s.titulo}</p>
-                          <p className="text-neutral-500 text-xs">S/ {s.precio} por ticket</p>
+                          <p className="font-bebas text-lg text-white tracking-wide">
+                            {s.titulo}
+                          </p>
+                          <p className="text-neutral-500 text-xs">
+                            S/ {s.precio} por ticket
+                          </p>
                         </div>
+
                         <div className="text-right">
-                          <p className="font-bebas text-2xl text-[#e8b800]">S/ {s.ingreso.toLocaleString()}</p>
-                          <p className="text-neutral-500 text-xs">{s.confirmados} tickets confirmados</p>
+                          <p className="font-bebas text-2xl text-[#e8b800]">
+                            S/ {s.ingreso.toLocaleString()}
+                          </p>
+                          <p className="text-neutral-500 text-xs">
+                            {confirmados} tickets confirmados
+                          </p>
                         </div>
                       </div>
+
                       <div className="flex justify-between text-xs text-neutral-500 mb-1">
                         <span>Progreso de ventas</span>
-                        <span>{s.vendidos} / {s.total}</span>
+                        <span>
+                          {confirmados} / {total}
+                        </span>
                       </div>
+
                       <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${(s.confirmados / s.total) * 100}%` }}
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${porcentaje}%` }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-red-600 to-[#e8b800] rounded-full" />
+                          className="h-full bg-gradient-to-r from-red-600 to-[#e8b800] rounded-full"
+                        />
                       </div>
                     </motion.div>
-                  ))}
+                  );
+                })}
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
