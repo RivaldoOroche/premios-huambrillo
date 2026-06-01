@@ -198,7 +198,7 @@ export default function ComprarTickets({ sorteo }: Props) {
                       <p className="font-bebas text-3xl text-[#1a3a2a] tracking-widest">958 748 545</p>
                     </div>
                     <div className="flex flex-col gap-1.5 items-end">
-                      <span className="text-xs bg-purple-100 text-purple-700 border border-purple-300 px-3 py-1 rounded-full font-bold">💜 YAPE</span>
+                      {/* <span className="text-xs bg-purple-100 text-purple-700 border border-purple-300 px-3 py-1 rounded-full font-bold">💜 YAPE</span> */}
                       <span className="text-xs bg-blue-100 text-blue-700 border border-blue-300 px-3 py-1 rounded-full font-bold">💙 PLIN</span>
                     </div>
                   </div>
