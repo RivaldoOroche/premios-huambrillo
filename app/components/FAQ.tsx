@@ -19,7 +19,7 @@ const preguntas = [
   },
   {
     pregunta: "¿Puedo participar desde cualquier parte del Perú?",
-    respuesta: "Sí, puedes participar desde cualquier ciudad del Perú. Los premios se entregan a nivel nacional.",
+    respuesta: "Si, puedes participar desde cualquier parte del PERÚ, nuestros premios podran ser enviados a nivel nacional como el caso de los premios en efectivo, a excepcion de algunos premios que por su naturaleza solo pueden ser entregados en Pucallpa",
   },
   {
     pregunta: "¿Qué pasa si ya pasó la fecha del sorteo?",
