@@ -62,12 +62,20 @@ export default async function PaginaEmpresas() {
                   href={`/empresas/${empresa.id}`}
                   className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl overflow-hidden hover:border-[#c9a84c] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_0_20px_rgba(201,168,76,0.15)] group block"
                 >
-                  <div className="aspect-video bg-gradient-to-br from-[#f5f0e8] to-[#e8dfc8] flex items-center justify-center text-6xl relative">
-                    {empresa.emoji}
-                    <div className="absolute top-2 right-2 bg-[#c9a84c] text-[#1a3a2a] text-xs font-black px-2 py-0.5 rounded-full">
-                      {empresa.categoria}
-                    </div>
+                <div className="aspect-video bg-gradient-to-br from-[#f5f0e8] to-[#e8dfc8] flex items-center justify-center relative overflow-hidden">
+                  {empresa.logo_url ? (
+                    <img
+                      src={empresa.logo_url}
+                      alt={empresa.nombre}
+                      className="w-full h-full object-contain p-4"
+                    />
+                  ) : (
+                    <span className="text-6xl">{empresa.emoji}</span>
+                  )}
+                  <div className="absolute top-2 right-2 bg-[#c9a84c] text-[#1a3a2a] text-xs font-black px-2 py-0.5 rounded-full">
+                    {empresa.categoria}
                   </div>
+                </div>
                   <div className="p-4">
                     <h3 className="font-bebas text-xl tracking-widest text-[#1a3a2a] group-hover:text-[#c9a84c] transition-colors mb-1">
                       {empresa.nombre}
