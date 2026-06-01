@@ -100,9 +100,9 @@ export default async function PaginaEmpresas() {
           <div className="mt-12 bg-[#1a3a2a] border-2 border-[#c9a84c]/40 rounded-2xl p-8 text-center">
             <p className="font-bebas text-3xl text-[#c9a84c] tracking-widest mb-2">¿Quieres ser una empresa aliada?</p>
             <p className="text-white/70 text-sm mb-6 max-w-md mx-auto">
-              Dale visibilidad a tu negocio participando como donante en nuestros sorteos.
+              Dale visibilidad a tu negocio participando en nuestros sorteos.
             </p>
-            <a href="https://wa.me/51999000000" target="_blank"
+            <a href="https://wa.me/51958748545" target="_blank"
               className="inline-block bg-[#c9a84c] hover:bg-[#e0c068] text-[#1a3a2a] font-black text-lg uppercase tracking-widest px-8 py-3 rounded-xl hover:scale-105 transition-all shadow-lg shadow-[#c9a84c]/30">
               💬 Contáctanos por WhatsApp
             </a>
