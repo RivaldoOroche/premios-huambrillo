@@ -9,7 +9,7 @@ export default function AlertaSeguridad() {
       </h2>
 
       <p className="text-neutral-600 max-w-lg mx-auto mb-6 leading-relaxed">
-       Atención el pago debe ser a nombre de: Cristian Melendez
+       Atención el pago debe ser a nombre de:
       </p>
 
       <div className="inline-block bg-[#1a3a2a] text-white font-black text-xl px-8 py-3 rounded-lg tracking-wide mb-6">

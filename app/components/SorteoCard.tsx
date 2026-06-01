@@ -77,7 +77,7 @@ export default function SorteoCard({ sorteo }: Props) {
         </Link>
 
         <p className="text-center text-xs text-neutral-500 mt-2">
-          A nombre de: <strong className="text-[#1a3a2a]">PREMIOS HUAMBRILLO DE Cristian Melendez</strong>
+          A nombre de: <strong className="text-[#1a3a2a]">Cristian Melendez</strong>
         </p>
       </div>
     </div>
