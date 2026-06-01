@@ -15,6 +15,34 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(data);
 }
 
+async function subirLogo(logo: File, id: string): Promise<string | null> {
+  const ext = logo.name.split(".").pop();
+  const fileName = `${id}-${Date.now()}.${ext}`;
+
+  // Convertir File a ArrayBuffer para evitar problemas con Next.js
+  const arrayBuffer = await logo.arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from("logos")
+    .upload(fileName, buffer, {
+      contentType: logo.type,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error("❌ Error subiendo logo:", uploadError.message);
+    return null;
+  }
+
+  const { data: urlData } = supabaseAdmin.storage
+    .from("logos")
+    .getPublicUrl(fileName);
+
+  console.log("✅ Logo subido:", urlData.publicUrl);
+  return urlData.publicUrl;
+}
+
 export async function POST(req: NextRequest) {
   if (!verificarAdmin(req)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
@@ -33,23 +61,23 @@ export async function POST(req: NextRequest) {
     if (val) body[campo] = val;
   });
 
-  // Subir logo si se proporcionó
-  if (logo && logo.size > 0) {
-    const fileName = `${body.id}-${Date.now()}.${logo.name.split(".").pop()}`;
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from("logos")
-      .upload(fileName, logo, { upsert: true });
+  if (!body.id) {
+    return NextResponse.json({ error: "El ID es obligatorio" }, { status: 400 });
+  }
 
-    if (!uploadError) {
-      const { data: urlData } = supabaseAdmin.storage
-        .from("logos")
-        .getPublicUrl(fileName);
-      body.logo_url = urlData.publicUrl;
-    }
+  // Subir logo
+  if (logo && logo.size > 0) {
+    const url = await subirLogo(logo, body.id);
+    if (url) body.logo_url = url;
+    else return NextResponse.json({ error: "Error subiendo el logo al storage" }, { status: 500 });
   }
 
   const { error } = await supabaseAdmin.from("empresas").insert(body);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("❌ Error insertando empresa:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
   return NextResponse.json({ ok: true });
 }
 
@@ -63,6 +91,8 @@ export async function PATCH(req: NextRequest) {
     const id = formData.get("id") as string;
     const logo = formData.get("logo") as File | null;
 
+    if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+
     const campos = [
       "nombre", "descripcion", "categoria", "emoji",
       "whatsapp", "telefono", "instagram", "facebook", "tiktok",
@@ -72,24 +102,22 @@ export async function PATCH(req: NextRequest) {
     const body: Record<string, string> = {};
     campos.forEach(campo => {
       const val = formData.get(campo) as string;
-      if (val !== null) body[campo] = val;
+      if (val !== null && val !== undefined) body[campo] = val;
     });
 
+    // Subir logo si se proporcionó
     if (logo && logo.size > 0) {
-      const fileName = `${id}-${Date.now()}.${logo.name.split(".").pop()}`;
-      const { error: uploadError } = await supabaseAdmin.storage
-        .from("logos")
-        .upload(fileName, logo, { upsert: true });
-      if (!uploadError) {
-        const { data: urlData } = supabaseAdmin.storage
-          .from("logos")
-          .getPublicUrl(fileName);
-        body.logo_url = urlData.publicUrl;
-      }
+      const url = await subirLogo(logo, id);
+      if (url) body.logo_url = url;
+      else return NextResponse.json({ error: "Error subiendo el logo al storage" }, { status: 500 });
     }
 
     const { error } = await supabaseAdmin.from("empresas").update(body).eq("id", id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("❌ Error actualizando empresa:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ ok: true });
   }
 
@@ -98,33 +126,4 @@ export async function PATCH(req: NextRequest) {
   const { error } = await supabaseAdmin.from("empresas").update(rest).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
-}
-
-export async function PUT(req: NextRequest) {
-  if (!verificarAdmin(req)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-
-  const formData = await req.formData();
-  const id = formData.get("id") as string;
-  const logo = formData.get("logo") as File;
-
-  if (!id || !logo) return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
-
-  const fileName = `${id}-${Date.now()}.${logo.name.split(".").pop()}`;
-  const { error: uploadError } = await supabaseAdmin.storage
-    .from("logos")
-    .upload(fileName, logo, { upsert: true });
-
-  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
-
-  const { data: urlData } = supabaseAdmin.storage
-    .from("logos")
-    .getPublicUrl(fileName);
-
-  const { error } = await supabaseAdmin
-    .from("empresas")
-    .update({ logo_url: urlData.publicUrl })
-    .eq("id", id);
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ url: urlData.publicUrl });
 }
