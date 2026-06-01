@@ -66,7 +66,7 @@ export default function SorteoCard({ sorteo }: Props) {
           <p className="text-4xl sm:text-5xl font-bebas leading-none text-[#1a3a2a]">
             <span className="text-xl sm:text-2xl">S/ </span>{sorteo.precio as number}
           </p>
-          <p className="text-xs text-neutral-500 mt-1">Paga con YAPE o PLIN</p>
+          <p className="text-xs text-neutral-500 mt-1">Paga con PLIN</p>
         </div>
 
         <Link
@@ -77,7 +77,7 @@ export default function SorteoCard({ sorteo }: Props) {
         </Link>
 
         <p className="text-center text-xs text-neutral-500 mt-2">
-          A nombre de: <strong className="text-[#1a3a2a]">HUAMBRILLO S.A.C.</strong>
+          A nombre de: <strong className="text-[#1a3a2a]">PREMIOS HUAMBRILLO DE Cristian Melendez</strong>
         </p>
       </div>
     </div>

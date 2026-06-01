@@ -15,7 +15,7 @@ const pasos = [
     numero: "02",
     emoji: "💰",
     titulo: "Realiza el pago",
-    descripcion: "Paga el valor del ticket por YAPE o PLIN. Verifica que el nombre del destinatario sea exactamente HUAMBRILLO S.A.C.",
+    descripcion: "Paga el valor del ticket por YAPE o PLIN. Verifica que el nombre del destinatario sea exactamente PREMIOS HUAMBRILLO o Cristian Melendez para evitar estafas.",
     color: "border-[#1a3a2a] bg-[#1a3a2a]/10",
     numColor: "text-[#2a5a3a]",
   },
@@ -120,7 +120,7 @@ export default function ComoParticipar() {
               Verifica siempre que el nombre del destinatario sea:
             </p>
             <p className="font-bebas text-xl tracking-widest text-[#1a3a2a]">
-              HUAMBRILLO S.A.C.
+              PREMIOS HUAMBRILLO o Cristian Melendez
             </p>
             <p className="text-red-600 text-xs font-bold mt-1">
               ⚠️ Si sale otro nombre, NO realices el pago

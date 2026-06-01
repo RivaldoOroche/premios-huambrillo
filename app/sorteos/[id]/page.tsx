@@ -104,7 +104,7 @@ export default async function DetalleSorteo({ params }: Props) {
           <p className="text-[#c9a84c] font-black uppercase tracking-wide mb-2">Verifica antes de pagar</p>
           <p className="text-white/70 text-sm">
             El nombre del destinatario debe ser exactamente:{" "}
-            <strong className="text-[#c9a84c]">HUAMBRILLO S.A.C.</strong>
+            <strong className="text-[#c9a84c]">PREMIOS HUAMBRILLO DE Cristian Melendez</strong>
           </p>
         </section>
 

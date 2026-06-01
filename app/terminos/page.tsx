@@ -30,7 +30,7 @@ export default function Terminos() {
           },
           {
             titulo: "3. Proceso de Compra",
-            contenido: "El participante debe realizar el pago del valor del ticket a la cuenta verificada de HUAMBRILLO S.A.C. y enviar el comprobante de pago a través de la plataforma web. Una vez verificado el pago, se asignará el número de ticket correspondiente. Premios Huambrillo no se hace responsable de pagos realizados a cuentas distintas a la oficial.",
+            contenido: "El participante debe realizar el pago del valor del ticket a la cuenta verificada de PREMIOS HUAMBRILLO o Cristian Melendez y enviar el comprobante de pago a través de la plataforma web. Una vez verificado el pago, se asignará el número de ticket correspondiente. Premios Huambrillo no se hace responsable de pagos realizados a cuentas distintas a la oficial.",
           },
           {
             titulo: "4. Realización del Sorteo",

@@ -10,7 +10,7 @@ const redesSociales = [
     emoji: "💬",
     color: "border-green-600/40 bg-green-600/10 hover:border-green-500",
     textColor: "text-green-600",
-    href: "https://wa.me/51999000000",
+    href: "https://wa.me/51958748545",
   },
   {
     nombre: "Facebook",
@@ -104,7 +104,7 @@ export default function Contacto() {
               <div className="w-12 h-1 bg-[#c9a84c] rounded mb-6" />
 
               {[
-                { emoji: "💬", label: "WhatsApp", valor: "+51 999 000 000", href: "https://wa.me/51999000000", color: "text-green-600" },
+                { emoji: "💬", label: "WhatsApp", valor: "+51 958 748 545", href: "https://wa.me/51958748545", color: "text-green-600" },
                 { emoji: "📧", label: "Correo", valor: "contacto@premioshuambrillo.com", href: "mailto:contacto@premioshuambrillo.com", color: "text-[#c9a84c]" },
                 { emoji: "📍", label: "Ubicación", valor: "Pucallpa, Ucayali, Perú", href: "#", color: "text-[#1a3a2a]" },
                 { emoji: "⏰", label: "Horario", valor: "Lun - Sáb: 9am - 8pm", href: "#", color: "text-[#1a3a2a]" },
@@ -128,7 +128,7 @@ export default function Contacto() {
               <div className="bg-[#1a3a2a]/5 border-2 border-[#c9a84c]/40 rounded-2xl p-4 mt-4">
                 <p className="text-[#1a3a2a] font-black text-sm mb-1">⚠️ Recuerda verificar</p>
                 <p className="text-neutral-600 text-xs leading-relaxed">
-                  Nuestro único nombre de pago es <strong className="text-[#c9a84c]">HUAMBRILLO S.A.C.</strong> No realices pagos a otras cuentas.
+                  Nuestro único nombre de pago es <strong className="text-[#c9a84c]">PREMIOS HUAMBRILLO o Cristian Melendez</strong> No realices pagos a otras cuentas.
                 </p>
               </div>
 

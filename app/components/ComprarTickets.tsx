@@ -144,7 +144,7 @@ export default function ComprarTickets({ sorteo }: Props) {
               <div className="bg-[#f5f0e8] border border-[#c9a84c]/30 rounded-xl p-4 space-y-2">
                 <p className="text-xs text-neutral-500 uppercase tracking-widest mb-2">Instrucciones</p>
                 <p className="text-sm text-neutral-700">1. Abre <strong className="text-[#1a3a2a]">YAPE o PLIN</strong></p>
-                <p className="text-sm text-neutral-700">2. Busca: <strong className="text-[#c9a84c]">HUAMBRILLO S.A.C.</strong></p>
+                <p className="text-sm text-neutral-700">2. Busca: <strong className="text-[#c9a84c]">Premios Huambrillo o Cristian Melendez</strong></p>
                 <p className="text-sm text-neutral-700">3. Paga exactamente: <strong className="text-[#c9a84c]">S/ {sorteo.precio * form.cantidad}</strong></p>
                 <p className="text-sm text-neutral-700">4. Guarda la captura de pantalla</p>
               </div>

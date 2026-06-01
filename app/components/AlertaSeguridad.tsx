@@ -14,7 +14,7 @@ export default function AlertaSeguridad() {
       </p>
 
       <div className="inline-block bg-[#1a3a2a] text-white font-black text-xl px-8 py-3 rounded-lg tracking-wide mb-6">
-        HUAMBRILLO S.A.C.
+       PREMIOS HUAMBRILLO DE Cristian Melendez
       </div>
 
       <p className="text-red-600 font-black tracking-wide text-sm">
