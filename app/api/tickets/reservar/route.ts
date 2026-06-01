@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { sorteo_id, cantidad, nombre, telefono, email } = await req.json();
+    const { sorteo_id, cantidad, nombre, telefono, email, tipo } = await req.json();
 
     if (!sorteo_id || !cantidad || !nombre || !telefono) {
       return NextResponse.json({ error: "Faltan datos obligatorios" }, { status: 400 });
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       p_nombre: nombre,
       p_telefono: telefono,
       p_email: email || null,
+      p_tipo: tipo || "aleatorio",
     });
 
     if (error) {
