@@ -21,45 +21,74 @@ const estadoConfig: Record<string, { label: string; color: string; emoji: string
 
 export default function ConsultarTickets() {
   const [telefono, setTelefono] = useState("");
+  const [dni, setDni] = useState("");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [buscado, setBuscado] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
 
   const buscar = async () => {
-    if (!telefono.trim()) return;
+    if (!telefono.trim() || !dni.trim()) {
+      setError("Ingresa tu teléfono y DNI para continuar");
+      return;
+    }
+    setError("");
     setCargando(true);
     setBuscado(false);
-    const res = await fetch(`/api/tickets/consultar?telefono=${encodeURIComponent(telefono.trim())}`);
+    const res = await fetch(
+      `/api/tickets/consultar?telefono=${encodeURIComponent(telefono.trim())}&dni=${encodeURIComponent(dni.trim())}`
+    );
     const data = await res.json();
     setTickets(Array.isArray(data) ? data : []);
     setBuscado(true);
     setCargando(false);
   };
 
+  const inputClass = "flex-1 bg-white border-2 border-[#c9a84c]/30 rounded-xl px-4 py-3 text-[#1a1a1a] text-sm placeholder:text-neutral-400 focus:outline-none focus:border-[#c9a84c] transition-colors";
+
   return (
     <div className="space-y-6">
+
       {/* Buscador */}
-      <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-6 shadow-sm">
-        <p className="text-xs text-neutral-500 uppercase tracking-widest mb-4">
-          Ingresa tu número de WhatsApp con el que compraste
+      <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-6 shadow-sm space-y-3">
+        <p className="text-xs text-neutral-500 uppercase tracking-widest">
+          Ingresa tus datos para consultar tus tickets
         </p>
-        <div className="flex gap-3">
+
+        <div>
+          <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-1">📞 Teléfono / WhatsApp</label>
           <input
             type="tel"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && buscar()}
             placeholder="Ej: 999 000 000"
-            className="flex-1 bg-white border-2 border-[#c9a84c]/30 rounded-xl px-4 py-3 text-[#1a1a1a] text-sm placeholder:text-neutral-400 focus:outline-none focus:border-[#c9a84c] transition-colors"
+            className={inputClass + " w-full"}
           />
-          <button
-            onClick={buscar}
-            disabled={cargando}
-            className="bg-[#c9a84c] hover:bg-[#e0c068] text-[#1a3a2a] font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:scale-105 transition-all disabled:opacity-50 shadow-md"
-          >
-            {cargando ? "..." : "Buscar"}
-          </button>
         </div>
+
+        <div>
+          <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-1">🪪 DNI</label>
+          <input
+            type="text"
+            value={dni}
+            onChange={(e) => setDni(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && buscar()}
+            placeholder="Ej: 12345678"
+            maxLength={8}
+            className={inputClass + " w-full"}
+          />
+        </div>
+
+        {error && <p className="text-red-500 text-xs font-bold">⚠️ {error}</p>}
+
+        <button
+          onClick={buscar}
+          disabled={cargando}
+          className="w-full bg-[#c9a84c] hover:bg-[#e0c068] text-[#1a3a2a] font-black uppercase tracking-widest py-3 rounded-xl hover:scale-105 transition-all disabled:opacity-50 shadow-md"
+        >
+          {cargando ? "Buscando..." : "Buscar mis tickets"}
+        </button>
       </div>
 
       {/* Resultados */}
@@ -74,8 +103,8 @@ export default function ConsultarTickets() {
             {tickets.length === 0 ? (
               <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl p-8 text-center shadow-sm">
                 <span className="text-4xl block mb-3">🔍</span>
-                <p className="text-neutral-600 font-bold">No encontramos tickets con ese número.</p>
-                <p className="text-neutral-400 text-sm mt-1">Verifica que el número sea el mismo con el que compraste.</p>
+                <p className="text-neutral-600 font-bold">No encontramos tickets con esos datos.</p>
+                <p className="text-neutral-400 text-sm mt-1">Verifica que el teléfono y DNI sean los mismos con los que compraste.</p>
               </div>
             ) : (
               <>
