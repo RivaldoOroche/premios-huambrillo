@@ -419,7 +419,7 @@ export default function AdminPanel() {
                  {stats.ingresosPorSorteo.map((s, i) => {
                   const confirmados = s.confirmados ?? 0;
                   const total = s.total ?? 0;
-                  const porcentaje = total > 0 ? Math.min((confirmados / total) * 100, 100) : 0;
+                  const porcentaje = total > 0 ? Math.min((s.vendidos / total) * 100, 100) : 0;
 
                   return (
                     <motion.div
