@@ -18,7 +18,7 @@ const redesSociales = [
     emoji: "🔵",
     color: "border-blue-600/40 bg-blue-600/10 hover:border-blue-500",
     textColor: "text-blue-600",
-    href: "https://facebook.com/premioshuambrillo",
+    href: "https://www.facebook.com/profile.php?id=61590388717742",
   },
   {
     nombre: "Instagram",
