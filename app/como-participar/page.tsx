@@ -15,15 +15,15 @@ const pasos = [
     numero: "02",
     emoji: "💰",
     titulo: "Realiza el pago",
-    descripcion: "Paga el valor del ticket por YAPE o PLIN. Verifica que el nombre del destinatario sea exactamente PREMIOS HUAMBRILLO o Cristian Melendez para evitar estafas.",
+    descripcion: "Paga el valor del ticket por PLIN, escaneando el código QR o ingresando al numero 958748545. Verifica que el nombre del destinatario sea exactamente Cristian Melendez para evitar estafas.",
     color: "border-[#1a3a2a] bg-[#1a3a2a]/10",
     numColor: "text-[#2a5a3a]",
   },
   {
     numero: "03",
     emoji: "📸",
-    titulo: "Envía tu comprobante",
-    descripcion: "Toma una captura de tu pago y envíala por WhatsApp. Te confirmaremos tu número de ticket en minutos.",
+    titulo: "Sube tu comprobante",
+    descripcion: "Toma una captura de tu pago y subela a nuestra plataforma oficial y llena la informacion de contacto, con la cual podremos comunicarnos contigo.",
     color: "border-[#c9a84c] bg-[#c9a84c]/5",
     numColor: "text-[#c9a84c]",
   },
@@ -31,7 +31,7 @@ const pasos = [
     numero: "04",
     emoji: "🏆",
     titulo: "Espera el sorteo",
-    descripcion: "El sorteo se realiza en vivo por Facebook. Todos los participantes tienen las mismas posibilidades de ganar.",
+    descripcion: "El sorteo se realiza en vivo por Facebook. Mientras más tickets hayas adquirido, mayores serán tus posibilidades de ganar.",
     color: "border-[#1a3a2a] bg-[#1a3a2a]/10",
     numColor: "text-[#2a5a3a]",
   },
@@ -39,7 +39,7 @@ const pasos = [
     numero: "05",
     emoji: "🎉",
     titulo: "¡Recoge tu premio!",
-    descripcion: "Si eres el ganador te contactamos de inmediato. Coordina la entrega de tu premio con nuestro equipo.",
+    descripcion: "Si eres el ganador te contactamos a traves de los datos proporcionados y coordinaremos la entrega de tu premio con nuestro equipo.",
     color: "border-[#c9a84c] bg-[#c9a84c]/5",
     numColor: "text-[#c9a84c]",
   },
@@ -120,7 +120,7 @@ export default function ComoParticipar() {
               Verifica siempre que el nombre del destinatario sea:
             </p>
             <p className="font-bebas text-xl tracking-widest text-[#1a3a2a]">
-              PREMIOS HUAMBRILLO o Cristian Melendez
+              Cristian Melendez
             </p>
             <p className="text-red-600 text-xs font-bold mt-1">
               ⚠️ Si sale otro nombre, NO realices el pago
