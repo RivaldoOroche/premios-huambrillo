@@ -105,7 +105,7 @@ export default function Contacto() {
 
               {[
                 { emoji: "💬", label: "WhatsApp", valor: "+51 958 748 545", href: "https://wa.me/51958748545", color: "text-green-600" },
-                { emoji: "📧", label: "Correo", valor: "contacto@premioshuambrillo.com", href: "mailto:contacto@premioshuambrillo.com", color: "text-[#c9a84c]" },
+                { emoji: "📧", label: "Correo", valor: "contacto@premioshuambrillo.com", href: "mailto:cmelendezc13@hotmail.com", color: "text-[#c9a84c]" },
                 { emoji: "📍", label: "Ubicación", valor: "Pucallpa, Ucayali, Perú", href: "#", color: "text-[#1a3a2a]" },
                 { emoji: "⏰", label: "Horario", valor: "Lun - Sáb: 9am - 8pm", href: "#", color: "text-[#1a3a2a]" },
               ].map((item, i) => (
@@ -128,7 +128,7 @@ export default function Contacto() {
               <div className="bg-[#1a3a2a]/5 border-2 border-[#c9a84c]/40 rounded-2xl p-4 mt-4">
                 <p className="text-[#1a3a2a] font-black text-sm mb-1">⚠️ Recuerda verificar</p>
                 <p className="text-neutral-600 text-xs leading-relaxed">
-                  Nuestro único nombre de pago es <strong className="text-[#c9a84c]">PREMIOS HUAMBRILLO o Cristian Melendez</strong> No realices pagos a otras cuentas.
+                  Nuestro único nombre de pago es <strong className="text-[#c9a84c]">Cristian Melendez</strong> No realices pagos a otras cuentas.
                 </p>
               </div>
 
