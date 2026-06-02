@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const nombre = formData.get("nombre") as string;
     const telefono = formData.get("telefono") as string;
     const email = formData.get("email") as string | null;
+    const dni = formData.get("dni") as string | null;
     const comprobante = formData.get("comprobante") as File;
 
     if (!sorteo_id || !cantidad || !nombre || !telefono || !comprobante) {
@@ -27,6 +28,7 @@ export async function POST(req: NextRequest) {
       p_telefono: telefono,
       p_email: email || null,
       p_tipo: "aleatorio",
+      p_dni: dni || null, // 👈 nuevo
     });
 
     if (rpcError) {

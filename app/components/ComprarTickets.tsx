@@ -18,7 +18,7 @@ export default function ComprarTickets({ sorteo }: Props) {
   const [comprobante, setComprobante] = useState<File | null>(null);
   const [mostrarQR, setMostrarQR] = useState(false);
   const [cantidad, setCantidad] = useState(1);
-  const [form, setForm] = useState({ nombre: "", telefono: "", email: "" });
+  const [form, setForm] = useState({ nombre: "", telefono: "", email: "", dni: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,16 +26,18 @@ export default function ComprarTickets({ sorteo }: Props) {
 
   const handleConfirmar = async () => {
     if (!comprobante) { setError("Debes subir tu comprobante"); return; }
-    if (!form.nombre || !form.telefono) { setError("Nombre y teléfono son obligatorios"); return; }
+    if (!form.nombre || !form.telefono || !form.dni) {
+      setError("Nombre, teléfono y DNI son obligatorios");
+      return;
+      }
     setError("");
     setCargando(true);
     try {
       const fd = new FormData();
-      fd.append("sorteo_id", sorteo.id);
-      fd.append("cantidad", String(cantidad));
       fd.append("nombre", form.nombre);
       fd.append("telefono", form.telefono);
       fd.append("email", form.email);
+      fd.append("dni", form.dni);
       fd.append("tipo", "aleatorio");
       fd.append("comprobante", comprobante);
       const res = await fetch("/api/tickets/confirmar", { method: "POST", body: fd });
@@ -229,7 +231,11 @@ export default function ComprarTickets({ sorteo }: Props) {
                   <p className="text-xs text-neutral-500 uppercase tracking-widest">Total pagado</p>
                   <p className="font-bebas text-2xl text-[#1a3a2a]">S/ {sorteo.precio * cantidad}</p>
                 </div>
-
+                <div>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-1">DNI *</label>
+                  <input name="dni" value={form.dni} onChange={handleChange} placeholder="12345678" maxLength={8}
+                    className={inputClass} />
+                </div>
                 <div>
                   <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-1">Nombre completo *</label>
                   <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Tu nombre" className={inputClass} />
