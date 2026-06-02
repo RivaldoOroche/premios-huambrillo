@@ -30,15 +30,15 @@ export default function Terminos() {
           },
           {
             titulo: "3. Proceso de Compra",
-            contenido: "El participante debe realizar el pago del valor del ticket a la cuenta verificada de PREMIOS HUAMBRILLO o Cristian Melendez y enviar el comprobante de pago a través de la plataforma web. Una vez verificado el pago, se asignará el número de ticket correspondiente. Premios Huambrillo no se hace responsable de pagos realizados a cuentas distintas a la oficial.",
+            contenido: "El participante debe realizar el pago del valor del ticket a la cuenta, escaneando el codigo QR o enviar el pago al nro 958748545 a nombre de Cristian Melendez y subir el comprobante de pago a través de la plataforma web, registrar los datos de contacto correspondientes y una vez verificado el pago, se asignará el número de ticket. Premios Huambrillo no se hace responsable de pagos realizados a cuentas distintas a la oficial.",
           },
           {
             titulo: "4. Realización del Sorteo",
-            contenido: "Los sorteos se realizan en la fecha y hora indicada en cada convocatoria, mediante transmisión en vivo a través de Facebook. El proceso es transparente y aleatorio. El resultado del sorteo es definitivo e inapelable.",
+            contenido: "Los sorteos se realizan en la fecha y hora indicada en los sorteos activos, mediante transmisión en vivo a través de Facebook. El proceso es transparente y aleatorio. El resultado del sorteo es definitivo e inapelable.",
           },
           {
             titulo: "5. Entrega de Premios",
-            contenido: "El ganador será contactado a través del número de WhatsApp registrado al momento de la compra. El premio debe ser reclamado dentro de los 30 días calendario posteriores al sorteo. Premios Huambrillo coordinará la entrega del premio con el ganador.",
+            contenido: "El ganador será contactado a través de la informacion registrada al momento de la compra. El premio debe ser reclamado dentro de los 15 días calendario posteriores al sorteo. Premios Huambrillo coordinará la entrega del premio con el ganador.",
           },
           {
             titulo: "6. Cancelaciones y Reembolsos",
