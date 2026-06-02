@@ -12,9 +12,22 @@ export async function POST(req: NextRequest) {
     const dni = formData.get("dni") as string | null;
     const comprobante = formData.get("comprobante") as File;
 
-    if (!sorteo_id || !cantidad || !nombre || !telefono || !comprobante) {
-      return NextResponse.json({ error: "Faltan datos obligatorios" }, { status: 400 });
-    }
+if (!sorteo_id || !cantidad || !nombre || !telefono || !dni || !comprobante) {
+  return NextResponse.json(
+    {
+      error: "Faltan datos obligatorios",
+      debug: {
+        sorteo_id: !!sorteo_id,
+        cantidad,
+        nombre: !!nombre,
+        telefono: !!telefono,
+        dni: !!dni,
+        comprobante: !!comprobante,
+      },
+    },
+    { status: 400 }
+  );
+}
 
     if (cantidad < 1 || cantidad > 20) {
       return NextResponse.json({ error: "Cantidad debe ser entre 1 y 20" }, { status: 400 });
