@@ -25,32 +25,50 @@ export default function ComprarTickets({ sorteo }: Props) {
   };
 
   const handleConfirmar = async () => {
-    if (!comprobante) { setError("Debes subir tu comprobante"); return; }
-    if (!form.nombre || !form.telefono || !form.dni) {
-      setError("Nombre, teléfono y DNI son obligatorios");
-      return;
-      }
-    setError("");
-    setCargando(true);
-    try {
-      const fd = new FormData();
-      fd.append("nombre", form.nombre);
-      fd.append("telefono", form.telefono);
-      fd.append("email", form.email);
-      fd.append("dni", form.dni);
-      fd.append("tipo", "aleatorio");
-      fd.append("comprobante", comprobante);
-      const res = await fetch("/api/tickets/confirmar", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setNumerosAsignados(data.numeros ?? []);
-      setPaso("confirmado");
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al confirmar");
-    } finally {
-      setCargando(false);
+  if (!comprobante) {
+    setError("Debes subir tu comprobante");
+    return;
+  }
+
+  if (!form.nombre || !form.telefono || !form.dni) {
+    setError("Nombre, teléfono y DNI son obligatorios");
+    return;
+  }
+
+  setError("");
+  setCargando(true);
+
+  try {
+    const fd = new FormData();
+
+    fd.append("sorteo_id", sorteo.id);
+    fd.append("cantidad", String(cantidad));
+    fd.append("nombre", form.nombre);
+    fd.append("telefono", form.telefono);
+    fd.append("email", form.email);
+    fd.append("dni", form.dni);
+    fd.append("tipo", "aleatorio");
+    fd.append("comprobante", comprobante);
+
+    const res = await fetch("/api/tickets/confirmar", {
+      method: "POST",
+      body: fd,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Error al confirmar");
     }
-  };
+
+    setNumerosAsignados(data.numeros ?? []);
+    setPaso("confirmado");
+  } catch (e: unknown) {
+    setError(e instanceof Error ? e.message : "Error al confirmar");
+  } finally {
+    setCargando(false);
+  }
+};
 
   const inputClass = "w-full bg-white border-2 border-[#c9a84c]/30 rounded-xl px-4 py-3 text-[#1a1a1a] text-sm placeholder:text-neutral-400 focus:outline-none focus:border-[#c9a84c] transition-colors";
 
