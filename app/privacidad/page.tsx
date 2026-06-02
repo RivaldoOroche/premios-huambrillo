@@ -37,15 +37,7 @@ export default function Privacidad() {
             contenido: "Al proporcionar tu número de WhatsApp, autorizas a Premios Huambrillo a enviarte mensajes relacionados con tu participación en los sorteos. Puedes solicitar en cualquier momento que dejemos de contactarte.",
           },
           {
-            titulo: "5. Cookies y Tecnologías Similares",
-            contenido: "Nuestro sitio web puede utilizar cookies para mejorar la experiencia del usuario. Estas cookies no recopilan información personal identificable.",
-          },
-          {
-            titulo: "6. Tus Derechos",
-            contenido: "Tienes derecho a acceder, corregir o eliminar tu información personal. Para ejercer estos derechos, contáctanos a través de nuestros canales oficiales.",
-          },
-          {
-            titulo: "7. Cambios en esta Política",
+            titulo: "5. Cambios en esta Política",
             contenido: "Podemos actualizar esta política de privacidad periódicamente. Te notificaremos sobre cambios significativos a través de nuestros canales oficiales.",
           },
         ].map((seccion, i) => (
