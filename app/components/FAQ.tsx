@@ -15,19 +15,15 @@ const preguntas = [
   },
   {
     pregunta: "¿Cómo me entregan el premio si gano?",
-    respuesta: "Te contactamos por WhatsApp al número con el que te registraste. Coordinamos la entrega del premio contigo directamente.",
+    respuesta: "Te contactaremos con los datos que registraste. Coordinamos la entrega del premio contigo directamente.",
   },
   {
     pregunta: "¿Puedo participar desde cualquier parte del Perú?",
     respuesta: "Si, puedes participar desde cualquier parte del PERÚ, nuestros premios podran ser enviados a nivel nacional como el caso de los premios en efectivo, a excepcion de algunos premios que por su naturaleza solo pueden ser entregados en Pucallpa",
   },
   {
-    pregunta: "¿Qué pasa si ya pasó la fecha del sorteo?",
-    respuesta: "Una vez realizado el sorteo, no se aceptan más tickets. Te recomendamos participar con anticipación para asegurar tu lugar.",
-  },
-  {
     pregunta: "¿Cómo verifico que mi pago fue recibido?",
-    respuesta: "Después de enviar tu comprobante por WhatsApp, te confirmamos tu número de ticket en un plazo máximo de 24 horas.",
+    respuesta: "Despues de subir tu comprobante de pago, se generara tu ticket de manera aleatoria, en caso de alguna duda puedes contactarnos por WhatsApp para confirmar tu participación.",
   },
 ];
 
