@@ -15,7 +15,7 @@ const pasos = [
     numero: "02",
     emoji: "💰",
     titulo: "Realiza el pago",
-    descripcion: "Paga el valor del ticket por PLIN, escaneando el código QR o ingresando al numero 958748545. Verifica que el nombre del destinatario sea exactamente Cristian Melendez para evitar estafas.",
+    descripcion: "Paga el valor del ticket, escaneando el código QR o directamente al numero 958748545 - PLIN. Verifica que el nombre del destinatario sea exactamente Cristian Melendez para evitar estafas.",
     color: "border-[#1a3a2a] bg-[#1a3a2a]/10",
     numColor: "text-[#2a5a3a]",
   },
