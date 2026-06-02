@@ -245,7 +245,7 @@ export default function ComprarTickets({ sorteo }: Props) {
                   <input name="telefono" value={form.telefono} onChange={handleChange} placeholder="999 000 000" className={inputClass} />
                 </div>
                 <div>
-                  <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-1">Correo (opcional)</label>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest block mb-1">Correo Electronico*</label>
                   <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="tu@correo.com" className={inputClass} />
                 </div>
 
