@@ -305,7 +305,8 @@ export default function ComprarTickets({ sorteo }: Props) {
                 <span className="text-6xl block">🎉</span>
                 <p className="font-bebas text-3xl text-[#1a3a2a] tracking-widest">¡Tickets registrados!</p>
                 <p className="text-neutral-500 text-sm max-w-xs mx-auto">
-                  Tu comprobante fue enviado. Te confirmaremos tus tickets por WhatsApp en menos de 24 horas.
+                  Listo tus tikets han sido generados. Nuestro equipo verificará el comprobante de pago y validar si el pago se realizó correctamente. 
+                  Gracias por participar en Premios Huambrillo, cualquier duda puedes contactarte al WhatsApp 958748545.
                 </p>
                 {numerosAsignados.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-2 mt-4">
