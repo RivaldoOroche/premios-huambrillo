@@ -8,15 +8,22 @@ function verificarAdmin(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!verificarAdmin(req)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-  // Tickets por estado
-  const { data: ticketStats } = await supabaseAdmin
-    .from("tickets")
-    .select("estado, sorteo_id");
-
-  // Sorteos activos
+  // Solo sorteos ACTIVOS
   const { data: sorteosData } = await supabaseAdmin
     .from("sorteo_config")
-    .select("sorteo_id, titulo, precio, total_tickets, tickets_vendidos, activo");
+    .select("sorteo_id, titulo, precio, total_tickets, tickets_vendidos, activo")
+    .eq("activo", true); // 👈 solo activos
+
+  // IDs de sorteos activos
+  const sorteoIdsActivos = sorteosData?.map(s => s.sorteo_id) ?? [];
+
+  // Tickets solo de sorteos activos
+  const { data: ticketStats } = sorteoIdsActivos.length > 0
+    ? await supabaseAdmin
+        .from("tickets")
+        .select("estado, sorteo_id")
+        .in("sorteo_id", sorteoIdsActivos) // 👈 solo de sorteos activos
+    : { data: [] };
 
   // Mensajes no leídos
   const { count: mensajesNoLeidos } = await supabaseAdmin
@@ -29,13 +36,13 @@ export async function GET(req: NextRequest) {
     .from("ganadores")
     .select("*", { count: "exact", head: true });
 
-  // Calcular estadísticas
+  // Estadísticas de tickets
   const confirmados = ticketStats?.filter(t => t.estado === "confirmado").length ?? 0;
   const pendientes  = ticketStats?.filter(t => t.estado === "pendiente").length ?? 0;
   const rechazados  = ticketStats?.filter(t => t.estado === "rechazado").length ?? 0;
   const total       = ticketStats?.length ?? 0;
 
-  // Ingresos por sorteo (solo confirmados)
+  // Ingresos por sorteo (solo confirmados, solo activos)
   const ingresosPorSorteo = sorteosData?.map(s => {
     const ticketsConfirmados = ticketStats?.filter(
       t => t.sorteo_id === s.sorteo_id && t.estado === "confirmado"
