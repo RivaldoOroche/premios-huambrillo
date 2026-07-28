@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "dashboard" | "tickets" | "sorteos" | "mensajes" | "ganadores" | "empresas";
+type Tab = "dashboard" | "tickets" | "sorteos" | "mensajes" | "ganadores" | "participantes" | "empresas";
 type EstadoTicket = "pendiente" | "confirmado" | "rechazado";
 
 interface Premio {
@@ -12,7 +12,12 @@ interface Premio {
   esMayor: boolean;
   imagen?: string;
 }
-
+interface Participante {
+  numero: number;
+  telefono: string;
+  dni: string;
+  estado: string;
+}
 interface Mensaje {
   id: string;
   nombre: string;
@@ -143,6 +148,16 @@ export default function AdminPanel() {
   const [premioseditando, setPremioseditando] = useState<Premio[]>([]);
   const [premioTempEdit, setPremioTempEdit] = useState<Premio>({ cantidad: 1, nombre: "", esMayor: false });
 
+  const [participantes, setParticipantes] = useState<Participante[]>([]);
+  const [cargandoPart, setCargandoPart] = useState(false);
+
+  const cargarParticipantes = useCallback(async () => {
+  setCargandoPart(true);
+  const res = await fetch("/api/admin/participantes");
+  const data = await res.json();
+  setParticipantes(Array.isArray(data) ? data : []);
+  setCargandoPart(false);
+  }, []);
   const cargarTickets = useCallback(async () => {
     setCargando(true);
     const res = await fetch(`/api/admin/tickets?estado=${estadoFiltro}`);
@@ -187,6 +202,7 @@ export default function AdminPanel() {
     if (!autenticado) return;
     if (tab === "dashboard") cargarStats();
     if (tab === "tickets")   cargarTickets();
+    if (tab === "participantes") cargarParticipantes();
     if (tab === "sorteos")   cargarSorteos();
     if (tab === "mensajes")  cargarMensajes();
     if (tab === "ganadores") cargarGanadores();
@@ -349,6 +365,7 @@ export default function AdminPanel() {
         {([
           ["dashboard", "📊 Dashboard"],
           ["tickets",   "🎫 Tickets"],
+          ["participantes", "📋 Participantes"],
           ["sorteos",   "🎰 Sorteos"],
           ["mensajes",  "📬 Mensajes"],
           ["ganadores", "🏆 Ganadores"],
@@ -550,7 +567,76 @@ export default function AdminPanel() {
             )}
           </div>
         )}
+        {tab === "participantes" && (
+          <div>
+            <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+              <div>
+                <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">Participantes del sorteo activo</p>
+                <p className="text-neutral-500 text-xs">Solo tickets confirmados · {participantes.length} en total</p>
+              </div>
+              <button
+                onClick={() => {
+                  const filas = [
+                    ["numero", "telefono", "dni", "estado"],
+                    ...participantes.map((p) => [p.numero, p.telefono, p.dni, p.estado]),
+                  ];
+                  const csv = filas.map((f) => f.join(",")).join("\n");
+                  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "participantes.csv";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                disabled={participantes.length === 0}
+                className="bg-[#e8b800] text-black font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl hover:brightness-110 transition-all disabled:opacity-40"
+              >
+                ⬇️ Descargar CSV
+              </button>
+            </div>
 
+            {cargandoPart ? (
+              <p className="text-neutral-500 text-center py-12">Cargando...</p>
+            ) : participantes.length === 0 ? (
+              <p className="text-neutral-500 text-center py-12">
+                No hay tickets confirmados en el sorteo activo
+              </p>
+            ) : (
+              <div className="bg-[#111] border-2 border-neutral-800 rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#1a1a1a]">
+                      <tr className="text-neutral-500 text-xs uppercase tracking-widest">
+                        <th className="text-left px-4 py-3">N°</th>
+                        <th className="text-left px-4 py-3">Teléfono</th>
+                        <th className="text-left px-4 py-3">DNI</th>
+                        <th className="text-left px-4 py-3">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {participantes.map((p) => (
+                        <tr key={p.numero} className="border-t border-neutral-800 hover:bg-[#1a1a1a] transition-colors">
+                          <td className="px-4 py-3">
+                            <span className="bg-[#e8b800] text-black font-black px-2.5 py-0.5 rounded-lg">
+                              #{String(p.numero).padStart(4, "0")}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-neutral-300">{p.telefono}</td>
+                          <td className="px-4 py-3 text-neutral-300">{p.dni?.trim() || "—"}</td>                              
+                          <td className="px-4 py-3">
+                            <span className="text-xs bg-green-600/20 text-green-400 px-2 py-0.5 rounded-full font-black uppercase">
+                              {p.estado}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         {/* TAB SORTEOS */}
         {tab === "sorteos" && (
           <div>
