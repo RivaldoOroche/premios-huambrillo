@@ -38,8 +38,8 @@ export default async function PaginaGanadores() {
         <div className="grid grid-cols-3 gap-4 mb-12">
           {[
             { valor: `${ganadores.length}+`, label: "Ganadores" },
-            { valor: "S/ 2M+", label: "En premios" },
-            { valor: "4 años", label: "De confianza" },
+            { valor: "S/ 600", label: "En premios" },
+            // { valor: "4 años", label: "De confianza" },
           ].map((stat, i) => (
             <FadeIn key={i} delay={i * 0.1}>
               <div className="bg-white border border-[#c9a84c]/30 rounded-2xl p-4 text-center shadow-sm">
