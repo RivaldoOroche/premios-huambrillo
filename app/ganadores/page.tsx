@@ -35,14 +35,14 @@ export default async function PaginaGanadores() {
       <section className="max-w-5xl mx-auto px-4 py-8">
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
           {[
             { valor: `${ganadores.length}+`, label: "Ganadores" },
             { valor: "S/ 600", label: "En premios" },
             // { valor: "4 años", label: "De confianza" },
           ].map((stat, i) => (
             <FadeIn key={i} delay={i * 0.1}>
-              <div className="bg-white border border-[#c9a84c]/30 rounded-2xl p-4 text-center shadow-sm">
+              <div className="w-[150px] sm:w-[200px] bg-white border border-[#c9a84c]/30 rounded-2xl p-4 text-center shadow-sm">
                 <p className="font-bebas text-3xl sm:text-4xl text-[#1a3a2a] tracking-widest">{stat.valor}</p>
                 <p className="text-neutral-500 text-xs uppercase tracking-widest mt-1">{stat.label}</p>
               </div>
