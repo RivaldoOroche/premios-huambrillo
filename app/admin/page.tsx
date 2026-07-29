@@ -609,11 +609,12 @@ const premiosDisponibles = useMemo(() => {
               </div>
               <button
                 onClick={() => {
+                  const escapar = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
                   const filas = [
-                    ["numero", "telefono", "dni", "estado"],
-                    ...participantes.map((p) => [p.numero, p.telefono, p.dni, p.estado]),
+                    ["numero", "nombre", "telefono", "dni", "estado"],
+                    ...participantes.map((p) => [p.numero, p.nombre, p.telefono, p.dni, p.estado]),
                   ];
-                  const csv = filas.map((f) => f.join(",")).join("\n");
+                  const csv = filas.map((f) => f.map(escapar).join(",")).join("\n");
                   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
                   const a = document.createElement("a");
                   a.href = url;
@@ -641,6 +642,7 @@ const premiosDisponibles = useMemo(() => {
                     <thead className="bg-[#1a1a1a]">
                       <tr className="text-neutral-500 text-xs uppercase tracking-widest">
                         <th className="text-left px-4 py-3">N°</th>
+                        <th className="text-left px-4 py-3">Nombre</th>
                         <th className="text-left px-4 py-3">Teléfono</th>
                         <th className="text-left px-4 py-3">DNI</th>
                         <th className="text-left px-4 py-3">Estado</th>
@@ -654,6 +656,7 @@ const premiosDisponibles = useMemo(() => {
                               #{String(p.numero).padStart(4, "0")}
                             </span>
                           </td>
+                          <td className="px-4 py-3 text-white font-bold">{p.nombre}</td>
                           <td className="px-4 py-3 text-neutral-300">{p.telefono}</td>
                           <td className="px-4 py-3 text-neutral-300">{p.dni?.trim() || "—"}</td>                              
                           <td className="px-4 py-3">
