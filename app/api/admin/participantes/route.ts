@@ -6,23 +6,29 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET() {
-  // 1) sorteo activo
-  const { data: config, error: errConfig } = await supabase
-    .from("sorteo_config")
-    .select("sorteo_id")
-    .eq("activo", true)
-    .limit(1)
-    .maybeSingle();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  let sorteoId = searchParams.get("sorteo_id");
 
-  if (errConfig) return NextResponse.json({ error: errConfig.message }, { status: 500 });
-  if (!config) return NextResponse.json([]); // no hay sorteo activo
+  // sin parámetro → usa el sorteo activo (comportamiento del tab Participantes)
+  if (!sorteoId) {
+    const { data: config, error: errConfig } = await supabase
+      .from("sorteo_config")
+      .select("sorteo_id")
+      .eq("activo", true)
+      .limit(1)
+      .maybeSingle();
 
-  // 2) tickets confirmados de ese sorteo
+    if (errConfig) return NextResponse.json({ error: errConfig.message }, { status: 500 });
+    if (!config) return NextResponse.json([]); // no hay sorteo activo
+    sorteoId = config.sorteo_id;
+  }
+
+  // tickets confirmados de ese sorteo
   const { data, error } = await supabase
     .from("tickets")
-    .select("numero, telefono, dni, estado")
-    .eq("sorteo_id", config.sorteo_id)
+    .select("id, numero, nombre, telefono, dni, estado")
+    .eq("sorteo_id", sorteoId)
     .ilike("estado", "%confirmado%")
     .order("numero", { ascending: true });
 
