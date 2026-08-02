@@ -38,7 +38,7 @@ export default async function PaginaGanadores() {
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {[
             { valor: `${ganadores.length}+`, label: "Ganadores" },
-            { valor: "S/ 600", label: "En premios" },
+            //{ valor: "S/ 600", label: "En premios" },
             // { valor: "4 años", label: "De confianza" },
           ].map((stat, i) => (
             <FadeIn key={i} delay={i * 0.1}>
