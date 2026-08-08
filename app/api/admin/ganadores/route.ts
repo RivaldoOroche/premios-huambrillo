@@ -39,11 +39,21 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   if (!verificarAdmin(req)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  const { id, visible } = await req.json();
-  const { error } = await supabaseAdmin
-    .from("ganadores")
-    .update({ visible })
-    .eq("id", id);
+  const body = await req.json();
+  const { id } = body;
+  if (!id) return NextResponse.json({ error: "Falta id" }, { status: 400 });
+
+  // solo se actualizan los campos que vengan en el body
+  const campos = ["nombre", "premio", "emoji", "fecha", "foto_url", "sorteo", "visible"] as const;
+  const update: Record<string, unknown> = {};
+  for (const c of campos) {
+    if (body[c] !== undefined) update[c] = body[c];
+  }
+
+  if (Object.keys(update).length === 0)
+    return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
+
+  const { error } = await supabaseAdmin.from("ganadores").update(update).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   revalidatePath("/ganadores");
   return NextResponse.json({ ok: true });

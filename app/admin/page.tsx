@@ -148,6 +148,9 @@ export default function AdminPanel() {
   const [fotoGanador, setFotoGanador] = useState<File | null>(null);
   const [subiendoGanador, setSubiendoGanador] = useState(false);
   const [mostrarGanadorForm, setMostrarGanadorForm] = useState(false);
+  const [ganadorEditando, setGanadorEditando] = useState<GanadorAdmin | null>(null);
+  const [fotoEditar, setFotoEditar] = useState<File | null>(null);
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
   const [nuevaEmpresa, setNuevaEmpresa] = useState({
     id: "", nombre: "", descripcion: "", categoria: "", emoji: "🏢",
     whatsapp: "", telefono: "", instagram: "", facebook: "", tiktok: "",
@@ -252,7 +255,7 @@ export default function AdminPanel() {
       .filter((p) => p.restantes > 0);
   }, [ganadorSorteo, ganadores]);
 
-  // Vista previa de la foto sin fugas de memoria
+  // Vistas previas de fotos sin fugas de memoria
   const previewFoto = useMemo(
     () => (fotoGanador ? URL.createObjectURL(fotoGanador) : null),
     [fotoGanador]
@@ -260,6 +263,14 @@ export default function AdminPanel() {
   useEffect(() => {
     return () => { if (previewFoto) URL.revokeObjectURL(previewFoto); };
   }, [previewFoto]);
+
+  const previewFotoEditar = useMemo(
+    () => (fotoEditar ? URL.createObjectURL(fotoEditar) : null),
+    [fotoEditar]
+  );
+  useEffect(() => {
+    return () => { if (previewFotoEditar) URL.revokeObjectURL(previewFotoEditar); };
+  }, [previewFotoEditar]);
 
   const handleLogin = async () => {
     setErrorLogin("");
@@ -304,6 +315,15 @@ export default function AdminPanel() {
     return data.url ?? null;
   };
 
+  const subirFotoGanador = async (file: File): Promise<string | null> => {
+    const fd = new FormData();
+    fd.append("foto", file);
+    const res = await fetch("/api/admin/ganadores/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || "Error al subir la foto"); return null; }
+    return data.url ?? null;
+  };
+
   const registrarGanador = async () => {
     if (!ganadorSorteo || !ganadorParticipante || !ganadorPremio) return;
     setSubiendoGanador(true);
@@ -311,12 +331,8 @@ export default function AdminPanel() {
       let foto_url: string | null = null;
 
       if (fotoGanador) {
-        const fd = new FormData();
-        fd.append("foto", fotoGanador);
-        const resUp = await fetch("/api/admin/ganadores/upload", { method: "POST", body: fd });
-        const dataUp = await resUp.json();
-        if (!resUp.ok) { alert(dataUp.error || "Error al subir la foto"); return; }
-        foto_url = dataUp.url;
+        foto_url = await subirFotoGanador(fotoGanador);
+        if (!foto_url) return;
       }
 
       const res = await fetch("/api/admin/ganadores", {
@@ -350,6 +366,45 @@ export default function AdminPanel() {
       cargarGanadores();
     } finally {
       setSubiendoGanador(false);
+    }
+  };
+
+  const guardarGanadorEditado = async () => {
+    if (!ganadorEditando) return;
+    setGuardandoEdicion(true);
+    try {
+      let foto_url = ganadorEditando.foto_url ?? null;
+
+      if (fotoEditar) {
+        const url = await subirFotoGanador(fotoEditar);
+        if (!url) return;
+        foto_url = url;
+      }
+
+      const res = await fetch("/api/admin/ganadores", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: ganadorEditando.id,
+          nombre: ganadorEditando.nombre,
+          premio: ganadorEditando.premio,
+          emoji: ganadorEditando.emoji || "🏆",
+          fecha: ganadorEditando.fecha,
+          sorteo: ganadorEditando.sorteo ?? null,
+          foto_url,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Error al guardar los cambios");
+        return;
+      }
+
+      setGanadorEditando(null);
+      setFotoEditar(null);
+      cargarGanadores();
+    } finally {
+      setGuardandoEdicion(false);
     }
   };
 
@@ -1080,15 +1135,23 @@ export default function AdminPanel() {
                     <div className="min-w-0">
                       <p className="font-black text-white truncate">{g.nombre}</p>
                       <p className="text-[#e8b800] text-sm truncate">{g.premio}</p>
-                      <p className="text-neutral-500 text-xs truncate">{g.sorteo_id} · {g.fecha}</p>
+                      <p className="text-neutral-500 text-xs truncate">{g.sorteo_id}{g.fecha ? ` · ${g.fecha}` : ""}</p>
                     </div>
                   </div>
-                  <button onClick={async () => {
-                    await fetch("/api/admin/ganadores", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: g.id, visible: !g.visible }) });
-                    cargarGanadores();
-                  }} className={`text-xs font-black px-3 py-1.5 rounded-lg border transition-all shrink-0 ${g.visible ? "bg-red-600/20 border-red-600/40 text-red-400 hover:bg-red-600/30" : "bg-green-600/20 border-green-600/40 text-green-400 hover:bg-green-600/30"}`}>
-                    {g.visible ? "Ocultar" : "Mostrar"}
-                  </button>
+                  <div className="flex flex-col gap-2 items-end shrink-0">
+                    <button
+                      onClick={() => { setGanadorEditando(g); setFotoEditar(null); }}
+                      className="text-xs bg-blue-600/20 border border-blue-600/40 text-blue-400 px-3 py-1.5 rounded-lg hover:bg-blue-600/30 transition-all font-black"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button onClick={async () => {
+                      await fetch("/api/admin/ganadores", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: g.id, visible: !g.visible }) });
+                      cargarGanadores();
+                    }} className={`text-xs font-black px-3 py-1.5 rounded-lg border transition-all ${g.visible ? "bg-red-600/20 border-red-600/40 text-red-400 hover:bg-red-600/30" : "bg-green-600/20 border-green-600/40 text-green-400 hover:bg-green-600/30"}`}>
+                      {g.visible ? "Ocultar" : "Mostrar"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1204,6 +1267,91 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+      {/* Modal editar ganador */}
+      <AnimatePresence>
+        {ganadorEditando && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => { setGanadorEditando(null); setFotoEditar(null); }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-6 w-full max-w-lg my-4 space-y-4">
+              <div className="flex justify-between items-center">
+                <p className="font-bebas text-2xl text-[#e8b800] tracking-widest">Editar Ganador</p>
+                <button onClick={() => { setGanadorEditando(null); setFotoEditar(null); }}
+                  className="text-neutral-500 hover:text-white text-2xl">✕</button>
+              </div>
+
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div>
+                  <label className="text-xs text-neutral-500 mb-1 block">Nombre</label>
+                  <input className={inputClass} value={ganadorEditando.nombre}
+                    onChange={e => setGanadorEditando({ ...ganadorEditando, nombre: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs text-neutral-500 mb-1 block">Premio</label>
+                  <input className={inputClass} value={ganadorEditando.premio}
+                    onChange={e => setGanadorEditando({ ...ganadorEditando, premio: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-neutral-500 mb-1 block">Emoji</label>
+                    <input className={inputClass} value={ganadorEditando.emoji ?? ""}
+                      onChange={e => setGanadorEditando({ ...ganadorEditando, emoji: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-neutral-500 mb-1 block">Fecha (texto)</label>
+                    <input className={inputClass} placeholder="Junio 2026" value={ganadorEditando.fecha ?? ""}
+                      onChange={e => setGanadorEditando({ ...ganadorEditando, fecha: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-neutral-500 mb-1 block">Sorteo (texto visible)</label>
+                  <input className={inputClass} placeholder="Gran Sorteo Junio" value={ganadorEditando.sorteo ?? ""}
+                    onChange={e => setGanadorEditando({ ...ganadorEditando, sorteo: e.target.value })} />
+                </div>
+
+                <div>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest mb-2 block">
+                    📸 Foto del ganador
+                  </label>
+                  {(previewFotoEditar || ganadorEditando.foto_url) && (
+                    <img src={previewFotoEditar || ganadorEditando.foto_url}
+                      alt="Foto" className="w-full max-w-xs aspect-video object-cover rounded-xl mb-2 border border-neutral-700" />
+                  )}
+                  <label className="flex items-center gap-3 border-2 border-dashed border-neutral-600 rounded-xl p-3 cursor-pointer hover:border-[#e8b800] transition-colors">
+                    <span className="text-xl">{fotoEditar ? "✅" : ganadorEditando.foto_url ? "🔄" : "📷"}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm text-white font-bold truncate">
+                        {fotoEditar ? fotoEditar.name : ganadorEditando.foto_url ? "Cambiar foto" : "Subir foto de la entrega"}
+                      </p>
+                      <p className="text-xs text-neutral-500">PNG, JPG o WEBP · máx 5MB</p>
+                    </div>
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={e => setFotoEditar(e.target.files?.[0] || null)} />
+                  </label>
+                  {fotoEditar && (
+                    <button onClick={() => setFotoEditar(null)}
+                      className="mt-1 text-xs text-red-400 hover:underline">× Cancelar cambio</button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button onClick={guardarGanadorEditado} disabled={guardandoEdicion}
+                  className="flex-1 bg-green-600 text-white font-black text-sm uppercase tracking-widest py-3 rounded-xl hover:bg-green-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                  {guardandoEdicion ? "⏳ Guardando..." : "✅ Guardar cambios"}
+                </button>
+                <button onClick={() => { setGanadorEditando(null); setFotoEditar(null); }}
+                  className="px-6 bg-neutral-800 text-neutral-400 font-black text-sm uppercase rounded-xl hover:bg-neutral-700 transition-all">
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal editar empresa */}
       <AnimatePresence>
