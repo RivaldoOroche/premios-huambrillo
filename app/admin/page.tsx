@@ -34,10 +34,13 @@ interface Mensaje {
 interface GanadorAdmin {
   id: string;
   sorteo_id: string;
+  ticket_id?: string;
   nombre: string;
   premio: string;
   emoji: string;
   fecha: string;
+  foto_url?: string;
+  sorteo?: string;
   visible: boolean;
 }
 
@@ -66,11 +69,14 @@ interface Ticket {
   nombre: string;
   telefono: string;
   email?: string;
+  dni?: string;
   cantidad: number;
   estado: string;
   comprobante?: string;
   notas_admin?: string;
   created_at: string;
+  expires_at?: string;
+  confirmed_at?: string;
 }
 
 interface Sorteo {
@@ -139,6 +145,8 @@ export default function AdminPanel() {
   const [cargandoPartSorteo, setCargandoPartSorteo] = useState(false);
   const [emojiGanador, setEmojiGanador] = useState("🏆");
   const [fechaGanador, setFechaGanador] = useState("");
+  const [fotoGanador, setFotoGanador] = useState<File | null>(null);
+  const [subiendoGanador, setSubiendoGanador] = useState(false);
   const [mostrarGanadorForm, setMostrarGanadorForm] = useState(false);
   const [nuevaEmpresa, setNuevaEmpresa] = useState({
     id: "", nombre: "", descripcion: "", categoria: "", emoji: "🏢",
@@ -159,12 +167,13 @@ export default function AdminPanel() {
   const [cargandoPart, setCargandoPart] = useState(false);
 
   const cargarParticipantes = useCallback(async () => {
-  setCargandoPart(true);
-  const res = await fetch("/api/admin/participantes");
-  const data = await res.json();
-  setParticipantes(Array.isArray(data) ? data : []);
-  setCargandoPart(false);
+    setCargandoPart(true);
+    const res = await fetch("/api/admin/participantes");
+    const data = await res.json();
+    setParticipantes(Array.isArray(data) ? data : []);
+    setCargandoPart(false);
   }, []);
+
   const cargarTickets = useCallback(async () => {
     setCargando(true);
     const res = await fetch(`/api/admin/tickets?estado=${estadoFiltro}`);
@@ -212,35 +221,45 @@ export default function AdminPanel() {
     if (tab === "participantes") cargarParticipantes();
     if (tab === "sorteos")   cargarSorteos();
     if (tab === "mensajes")  cargarMensajes();
-    if (tab === "ganadores") { cargarGanadores(); cargarSorteos(); }   // ← cambia
+    if (tab === "ganadores") { cargarGanadores(); cargarSorteos(); }
     if (tab === "empresas")  cargarEmpresas();
   }, [autenticado, tab, estadoFiltro, cargarStats, cargarTickets, cargarParticipantes, cargarSorteos, cargarMensajes, cargarGanadores, cargarEmpresas]);
+
   // Al cambiar de sorteo: recarga participantes y resetea los selectores de abajo
-useEffect(() => {
-  setGanadorParticipante(null);
-  setGanadorPremio(null);
-  if (!ganadorSorteo) { setParticipantesSorteo([]); return; }
+  useEffect(() => {
+    setGanadorParticipante(null);
+    setGanadorPremio(null);
+    if (!ganadorSorteo) { setParticipantesSorteo([]); return; }
 
-  setCargandoPartSorteo(true);
-  fetch(`/api/admin/participantes?sorteo_id=${encodeURIComponent(ganadorSorteo.sorteo_id)}`)
-    .then((r) => r.json())
-    .then((d) => setParticipantesSorteo(Array.isArray(d) ? d : []))
-    .finally(() => setCargandoPartSorteo(false));
-}, [ganadorSorteo]);
+    setCargandoPartSorteo(true);
+    fetch(`/api/admin/participantes?sorteo_id=${encodeURIComponent(ganadorSorteo.sorteo_id)}`)
+      .then((r) => r.json())
+      .then((d) => setParticipantesSorteo(Array.isArray(d) ? d : []))
+      .finally(() => setCargandoPartSorteo(false));
+  }, [ganadorSorteo]);
 
-const sorteosActivos = useMemo(() => sorteos.filter((s) => s.activo), [sorteos]);
+  const sorteosActivos = useMemo(() => sorteos.filter((s) => s.activo), [sorteos]);
 
-const premiosDisponibles = useMemo(() => {
-  if (!ganadorSorteo) return [];
-  return (ganadorSorteo.premios ?? [])
-    .map((p) => {
-      const usados = ganadores.filter(
-        (g) => g.sorteo_id === ganadorSorteo.sorteo_id && g.premio === p.nombre
-      ).length;
-      return { ...p, restantes: p.cantidad - usados };
-    })
-    .filter((p) => p.restantes > 0);
-}, [ganadorSorteo, ganadores]);
+  const premiosDisponibles = useMemo(() => {
+    if (!ganadorSorteo) return [];
+    return (ganadorSorteo.premios ?? [])
+      .map((p) => {
+        const usados = ganadores.filter(
+          (g) => g.sorteo_id === ganadorSorteo.sorteo_id && g.premio === p.nombre
+        ).length;
+        return { ...p, restantes: p.cantidad - usados };
+      })
+      .filter((p) => p.restantes > 0);
+  }, [ganadorSorteo, ganadores]);
+
+  // Vista previa de la foto sin fugas de memoria
+  const previewFoto = useMemo(
+    () => (fotoGanador ? URL.createObjectURL(fotoGanador) : null),
+    [fotoGanador]
+  );
+  useEffect(() => {
+    return () => { if (previewFoto) URL.revokeObjectURL(previewFoto); };
+  }, [previewFoto]);
 
   const handleLogin = async () => {
     setErrorLogin("");
@@ -283,6 +302,55 @@ const premiosDisponibles = useMemo(() => {
     const res = await fetch("/api/admin/premios/upload", { method: "POST", body: fd });
     const data = await res.json();
     return data.url ?? null;
+  };
+
+  const registrarGanador = async () => {
+    if (!ganadorSorteo || !ganadorParticipante || !ganadorPremio) return;
+    setSubiendoGanador(true);
+    try {
+      let foto_url: string | null = null;
+
+      if (fotoGanador) {
+        const fd = new FormData();
+        fd.append("foto", fotoGanador);
+        const resUp = await fetch("/api/admin/ganadores/upload", { method: "POST", body: fd });
+        const dataUp = await resUp.json();
+        if (!resUp.ok) { alert(dataUp.error || "Error al subir la foto"); return; }
+        foto_url = dataUp.url;
+      }
+
+      const res = await fetch("/api/admin/ganadores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sorteo_id: ganadorSorteo.sorteo_id,
+          ticket_id: ganadorParticipante.id,
+          nombre: ganadorParticipante.nombre,
+          premio: ganadorPremio.nombre,
+          emoji: emojiGanador || "🏆",
+          fecha: fechaGanador,
+          foto_url,
+          sorteo: ganadorSorteo.titulo,
+          visible: true,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Error al registrar el ganador");
+        return;
+      }
+
+      setMostrarGanadorForm(false);
+      setGanadorSorteo(null);
+      setGanadorParticipante(null);
+      setGanadorPremio(null);
+      setFechaGanador("");
+      setEmojiGanador("🏆");
+      setFotoGanador(null);
+      cargarGanadores();
+    } finally {
+      setSubiendoGanador(false);
+    }
   };
 
   const agregarPremio = () => {
@@ -600,6 +668,8 @@ const premiosDisponibles = useMemo(() => {
             )}
           </div>
         )}
+
+        {/* TAB PARTICIPANTES */}
         {tab === "participantes" && (
           <div>
             <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
@@ -658,7 +728,7 @@ const premiosDisponibles = useMemo(() => {
                           </td>
                           <td className="px-4 py-3 text-white font-bold">{p.nombre}</td>
                           <td className="px-4 py-3 text-neutral-300">{p.telefono}</td>
-                          <td className="px-4 py-3 text-neutral-300">{p.dni?.trim() || "—"}</td>                              
+                          <td className="px-4 py-3 text-neutral-300">{p.dni?.trim() || "—"}</td>
                           <td className="px-4 py-3">
                             <span className="text-xs bg-green-600/20 text-green-400 px-2 py-0.5 rounded-full font-black uppercase">
                               {p.estado}
@@ -673,6 +743,7 @@ const premiosDisponibles = useMemo(() => {
             )}
           </div>
         )}
+
         {/* TAB SORTEOS */}
         {tab === "sorteos" && (
           <div>
@@ -868,140 +939,154 @@ const premiosDisponibles = useMemo(() => {
                 + Nuevo ganador
               </button>
             </div>
-            <AnimatePresence>
-              {mostrarGanadorForm && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                  className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-4 overflow-visible">
-                  <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Registrar ganador</p>
 
-                  {/* 1 — SORTEO */}
+            {mostrarGanadorForm && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-[#111] border-2 border-[#e8b800]/30 rounded-2xl p-5 mb-6 space-y-4">
+                <p className="font-bebas text-xl text-[#e8b800] tracking-widest">Registrar ganador</p>
+
+                {/* 1 — SORTEO */}
+                <div>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest mb-1.5 block">1️⃣ Sorteo activo</label>
+                  <Buscador
+                    items={sorteosActivos}
+                    valor={ganadorSorteo}
+                    onSelect={setGanadorSorteo}
+                    getKey={(s) => s.sorteo_id}
+                    getLabel={(s) => s.titulo}
+                    getSub={(s) => `${s.sorteo_id} · ${s.fecha}`}
+                    placeholder="Buscar sorteo activo..."
+                    mensajeVacio="No hay sorteos activos"
+                  />
+                </div>
+
+                {/* 2 — PARTICIPANTE */}
+                <div>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest mb-1.5 block">
+                    2️⃣ Participante {ganadorSorteo && `(${participantesSorteo.length} confirmados)`}
+                  </label>
+                  <Buscador
+                    items={participantesSorteo}
+                    valor={ganadorParticipante}
+                    onSelect={setGanadorParticipante}
+                    getKey={(p) => p.id}
+                    getLabel={(p) => `#${String(p.numero).padStart(4, "0")} — ${p.nombre}`}
+                    getSub={(p) => `${p.telefono}${p.dni?.trim() ? ` · DNI ${p.dni}` : ""}`}
+                    placeholder={
+                      !ganadorSorteo ? "Primero elige un sorteo"
+                      : cargandoPartSorteo ? "Cargando participantes..."
+                      : "Buscar por número, nombre, teléfono o DNI..."
+                    }
+                    disabled={!ganadorSorteo || cargandoPartSorteo}
+                    mensajeVacio="Sin tickets confirmados en este sorteo"
+                  />
+                </div>
+
+                {/* 3 — PREMIO */}
+                <div>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest mb-1.5 block">3️⃣ Premio disponible</label>
+                  <Buscador
+                    items={premiosDisponibles}
+                    valor={ganadorPremio}
+                    onSelect={setGanadorPremio}
+                    getKey={(p) => p.nombre}
+                    getLabel={(p) => `${p.nombre}${p.esMayor ? " ⭐" : ""}`}
+                    getSub={(p) => `${p.restantes} de ${p.cantidad} disponibles`}
+                    placeholder={ganadorSorteo ? "Buscar premio..." : "Primero elige un sorteo"}
+                    disabled={!ganadorSorteo}
+                    mensajeVacio="Todos los premios de este sorteo ya fueron entregados"
+                  />
+                </div>
+
+                {/* Complementos */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-neutral-500 uppercase tracking-widest mb-1.5 block">1️⃣ Sorteo activo</label>
-                    <Buscador
-                      items={sorteosActivos}
-                      valor={ganadorSorteo}
-                      onSelect={setGanadorSorteo}
-                      getKey={(s) => s.sorteo_id}
-                      getLabel={(s) => s.titulo}
-                      getSub={(s) => `${s.sorteo_id} · ${s.fecha}`}
-                      placeholder="Buscar sorteo activo..."
-                      mensajeVacio="No hay sorteos activos"
-                    />
+                    <label className="text-xs text-neutral-500 mb-1 block">Emoji (si no subes foto)</label>
+                    <input className={inputClass} placeholder="🏆" value={emojiGanador}
+                      onChange={(e) => setEmojiGanador(e.target.value)} />
                   </div>
-
-                  {/* 2 — PARTICIPANTE */}
                   <div>
-                    <label className="text-xs text-neutral-500 uppercase tracking-widest mb-1.5 block">
-                      2️⃣ Participante {ganadorSorteo && `(${participantesSorteo.length} confirmados)`}
-                    </label>
-                    <Buscador
-                      items={participantesSorteo}
-                      valor={ganadorParticipante}
-                      onSelect={setGanadorParticipante}
-                      getKey={(p) => p.id}
-                      getLabel={(p) => `#${String(p.numero).padStart(4, "0")} — ${p.nombre}`}
-                      getSub={(p) => `${p.telefono}${p.dni?.trim() ? ` · DNI ${p.dni}` : ""}`}
-                      placeholder={
-                        !ganadorSorteo ? "Primero elige un sorteo"
-                        : cargandoPartSorteo ? "Cargando participantes..."
-                        : "Buscar por número, nombre, teléfono o DNI..."
-                      }
-                      disabled={!ganadorSorteo || cargandoPartSorteo}
-                      mensajeVacio="Sin tickets confirmados en este sorteo"
-                    />
+                    <label className="text-xs text-neutral-500 mb-1 block">Fecha (texto visible)</label>
+                    <input className={inputClass} placeholder="Junio 2026" value={fechaGanador}
+                      onChange={(e) => setFechaGanador(e.target.value)} />
                   </div>
+                </div>
 
-                  {/* 3 — PREMIO */}
-                  <div>
-                    <label className="text-xs text-neutral-500 uppercase tracking-widest mb-1.5 block">3️⃣ Premio disponible</label>
-                    <Buscador
-                      items={premiosDisponibles}
-                      valor={ganadorPremio}
-                      onSelect={setGanadorPremio}
-                      getKey={(p) => p.nombre}
-                      getLabel={(p) => `${p.nombre}${p.esMayor ? " ⭐" : ""}`}
-                      getSub={(p) => `${p.restantes} de ${p.cantidad} disponibles`}
-                      placeholder={ganadorSorteo ? "Buscar premio..." : "Primero elige un sorteo"}
-                      disabled={!ganadorSorteo}
-                      mensajeVacio="Todos los premios de este sorteo ya fueron entregados"
-                    />
-                  </div>
-
-                  {/* Complementos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs text-neutral-500 mb-1 block">Emoji</label>
-                      <input className={inputClass} placeholder="🏆" value={emojiGanador}
-                        onChange={(e) => setEmojiGanador(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="text-xs text-neutral-500 mb-1 block">Fecha (texto visible)</label>
-                      <input className={inputClass} placeholder="Junio 2026" value={fechaGanador}
-                        onChange={(e) => setFechaGanador(e.target.value)} />
-                    </div>
-                  </div>
-
-                  {/* Resumen */}
-                  {ganadorSorteo && ganadorParticipante && ganadorPremio && (
-                    <div className="bg-[#1a1a1a] border border-[#e8b800]/30 rounded-xl p-4 flex items-center gap-3">
-                      <span className="text-3xl">{emojiGanador}</span>
-                      <div className="min-w-0">
-                        <p className="font-black text-white truncate">{ganadorParticipante.nombre}</p>
-                        <p className="text-[#e8b800] text-sm truncate">{ganadorPremio.nombre}</p>
-                        <p className="text-neutral-500 text-xs truncate">
-                          Ticket #{String(ganadorParticipante.numero).padStart(4, "0")} · {ganadorSorteo.titulo}
-                        </p>
-                      </div>
-                    </div>
+                {/* Foto del ganador */}
+                <div>
+                  <label className="text-xs text-neutral-500 uppercase tracking-widest mb-2 block">
+                    📸 Foto del ganador con su premio
+                  </label>
+                  {previewFoto && (
+                    <img src={previewFoto} alt="Vista previa"
+                      className="w-full max-w-xs aspect-video object-cover rounded-xl mb-2 border border-neutral-700" />
                   )}
+                  <label className="flex items-center gap-3 border-2 border-dashed border-neutral-600 rounded-xl p-4 cursor-pointer hover:border-[#e8b800] transition-colors">
+                    <span className="text-2xl">{fotoGanador ? "✅" : "📷"}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm text-white font-bold truncate">
+                        {fotoGanador ? fotoGanador.name : "Subir foto de la entrega"}
+                      </p>
+                      <p className="text-xs text-neutral-500">PNG, JPG o WEBP · máx 5MB · Opcional</p>
+                    </div>
+                    <input type="file" accept="image/*" className="hidden"
+                      onChange={(e) => setFotoGanador(e.target.files?.[0] || null)} />
+                  </label>
+                  {fotoGanador && (
+                    <button onClick={() => setFotoGanador(null)}
+                      className="mt-1 text-xs text-red-400 hover:underline">× Quitar foto</button>
+                  )}
+                </div>
 
-                  <button
-                    disabled={!ganadorSorteo || !ganadorParticipante || !ganadorPremio}
-                    onClick={async () => {
-                      await fetch("/api/admin/ganadores", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          sorteo_id: ganadorSorteo!.sorteo_id,
-                          nombre: ganadorParticipante!.nombre,
-                          premio: ganadorPremio!.nombre,
-                          emoji: emojiGanador || "🏆",
-                          fecha: fechaGanador,
-                          visible: true,
-                        }),
-                      });
-                      setMostrarGanadorForm(false);
-                      setGanadorSorteo(null);
-                      setGanadorParticipante(null);
-                      setGanadorPremio(null);
-                      setFechaGanador("");
-                      setEmojiGanador("🏆");
-                      cargarGanadores();
-                    }}
-                    className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    ✅ Registrar ganador
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                {/* Resumen */}
+                {ganadorSorteo && ganadorParticipante && ganadorPremio && (
+                  <div className="bg-[#1a1a1a] border border-[#e8b800]/30 rounded-xl p-4 flex items-center gap-3">
+                    {previewFoto ? (
+                      <img src={previewFoto} alt="" className="w-14 h-14 object-cover rounded-xl shrink-0" />
+                    ) : (
+                      <span className="text-3xl">{emojiGanador}</span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-black text-white truncate">{ganadorParticipante.nombre}</p>
+                      <p className="text-[#e8b800] text-sm truncate">{ganadorPremio.nombre}</p>
+                      <p className="text-neutral-500 text-xs truncate">
+                        Ticket #{String(ganadorParticipante.numero).padStart(4, "0")} · {ganadorSorteo.titulo}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  disabled={!ganadorSorteo || !ganadorParticipante || !ganadorPremio || subiendoGanador}
+                  onClick={registrarGanador}
+                  className="bg-green-600 text-white font-black text-sm uppercase tracking-widest px-6 py-2.5 rounded-xl hover:bg-green-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {subiendoGanador ? "⏳ Guardando..." : "✅ Registrar ganador"}
+                </button>
+              </motion.div>
+            )}
+
             <div className="space-y-3">
               {ganadores.length === 0 ? (
                 <p className="text-neutral-500 text-center py-12">No hay ganadores registrados</p>
               ) : ganadores.map((g) => (
                 <div key={g.id} className={`bg-[#111] border-2 rounded-2xl p-4 flex items-center justify-between gap-4 ${g.visible ? "border-neutral-800" : "border-neutral-700 opacity-50"}`}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">{g.emoji}</span>
-                    <div>
-                      <p className="font-black text-white">{g.nombre}</p>
-                      <p className="text-[#e8b800] text-sm">{g.premio}</p>
-                      <p className="text-neutral-500 text-xs">{g.sorteo_id} · {g.fecha}</p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {g.foto_url ? (
+                      <img src={g.foto_url} alt={g.nombre} className="w-14 h-14 object-cover rounded-xl shrink-0" />
+                    ) : (
+                      <span className="text-3xl shrink-0">{g.emoji}</span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-black text-white truncate">{g.nombre}</p>
+                      <p className="text-[#e8b800] text-sm truncate">{g.premio}</p>
+                      <p className="text-neutral-500 text-xs truncate">{g.sorteo_id} · {g.fecha}</p>
                     </div>
                   </div>
                   <button onClick={async () => {
                     await fetch("/api/admin/ganadores", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: g.id, visible: !g.visible }) });
                     cargarGanadores();
-                  }} className={`text-xs font-black px-3 py-1.5 rounded-lg border transition-all ${g.visible ? "bg-red-600/20 border-red-600/40 text-red-400 hover:bg-red-600/30" : "bg-green-600/20 border-green-600/40 text-green-400 hover:bg-green-600/30"}`}>
+                  }} className={`text-xs font-black px-3 py-1.5 rounded-lg border transition-all shrink-0 ${g.visible ? "bg-red-600/20 border-red-600/40 text-red-400 hover:bg-red-600/30" : "bg-green-600/20 border-green-600/40 text-green-400 hover:bg-green-600/30"}`}>
                     {g.visible ? "Ocultar" : "Mostrar"}
                   </button>
                 </div>

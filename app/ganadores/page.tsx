@@ -55,29 +55,44 @@ export default async function PaginaGanadores() {
         <div className="w-16 h-1 bg-[#c9a84c] rounded mb-8" />
 
         {/* Grid ganadores */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {ganadores.map((g, i) => (
-            <FadeIn key={g.id} delay={i * 0.05}>
-              <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl overflow-hidden hover:border-[#c9a84c] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_0_20px_rgba(201,168,76,0.15)]">
-                <div className="aspect-video bg-gradient-to-br from-[#f5f0e8] to-[#e8dfc8] flex items-center justify-center relative">
-                  {g.foto_url ? (
-                    <img src={g.foto_url} alt={g.nombre} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-6xl">{g.emoji}</span>
-                  )}
-                  <div className="absolute bottom-2 right-2 bg-[#c9a84c] text-[#1a3a2a] text-xs font-black px-2 py-0.5 rounded-full">
-                    {g.fecha}
+        {ganadores.length === 0 ? (
+          <p className="text-neutral-500 text-center py-16">
+            Aún no hay ganadores publicados. ¡Muy pronto!
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {ganadores.map((g, i) => (
+              <FadeIn key={g.id} delay={i * 0.05}>
+                <div className="bg-white border-2 border-[#c9a84c]/30 rounded-2xl overflow-hidden hover:border-[#c9a84c] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_0_20px_rgba(201,168,76,0.15)] h-full flex flex-col">
+                  <div className="aspect-video bg-gradient-to-br from-[#f5f0e8] to-[#e8dfc8] flex items-center justify-center relative overflow-hidden">
+                    {g.foto_url ? (
+                      <img
+                        src={g.foto_url}
+                        alt={`${g.nombre} — ${g.premio}`}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-6xl">{g.emoji}</span>
+                    )}
+                    {g.fecha && (
+                      <div className="absolute bottom-2 right-2 bg-[#c9a84c] text-[#1a3a2a] text-xs font-black px-2 py-0.5 rounded-full shadow">
+                        {g.fecha}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 flex-1">
+                    <p className="font-bebas text-xl tracking-widest text-[#1a3a2a] mb-1">{g.nombre}</p>
+                    <p className="text-[#c9a84c] font-black text-sm mb-1">{g.premio}</p>
+                    {g.sorteo && (
+                      <p className="text-neutral-500 text-xs uppercase tracking-wide">{g.sorteo}</p>
+                    )}
                   </div>
                 </div>
-                <div className="p-4">
-                  <p className="font-bebas text-xl tracking-widest text-[#1a3a2a] mb-1">{g.nombre}</p>
-                  <p className="text-[#c9a84c] font-black text-sm mb-1">{g.premio}</p>
-                  <p className="text-neutral-500 text-xs uppercase tracking-wide">{g.sorteo}</p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
+              </FadeIn>
+            ))}
+          </div>
+        )}
 
         {/* CTA */}
         <FadeIn delay={0.3}>
